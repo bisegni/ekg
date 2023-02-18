@@ -1,0 +1,20 @@
+# Calculator test
+record(ao, "variable:a")
+{
+    field(DRVH, "100")
+    field(DOL, "0")
+    field(PINI, "YES")
+}
+record(ao, "variable:b")
+{
+    field(DRVH, "100")
+    field(DOL, "0")
+    field(PINI, "YES")
+}
+record(calc, "variable:sum")
+{
+    field(SCAN, "1 second")
+    field(INPA, "variable:a")
+    field(INPB, "variable:b")
+    field(CALC, "A+B")
+}
