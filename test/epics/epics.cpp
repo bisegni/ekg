@@ -1,8 +1,11 @@
 #include <gtest/gtest.h>
-#include <epics/EpicsChannel.h>
-#include <epics/EpicsChannelMonitor.h>
+#include <gateway/service/epics/EpicsChannel.h>
+#include <gateway/service/epics/EpicsChannelMonitor.h>
 #include <thread>
 #include <chrono>
+
+using namespace gateway::epics_impl;
+
 TEST(EpicsTest, ChannelFault) {
     std::unique_ptr<EpicsChannel> pc;
     EXPECT_NO_THROW(pc = std::make_unique<EpicsChannel>("ca","bacd_channel_name"));
