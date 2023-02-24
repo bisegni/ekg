@@ -45,7 +45,6 @@ void RDKafkaPublisher::init(const std::string &bootstrap_server) {
   // RDK_CONF_SET(conf, "debug", "cgrp,topic,fetch,protocol", RDK_PUB_ERR_)
   RDK_CONF_SET(conf, "bootstrap.servers", bootstrap_server.c_str())
   RDK_CONF_SET(conf, "dr_cb", this);
-  // RDK_CONF_SET(conf, "batch.size", "2000", errstr);
   producer.reset(RdKafka::Producer::create(conf.get(), errstr));
   if (!producer) {
     //RDK_PUB_ERR_ << "Failed to create producer: " << errstr << std::endl;
@@ -60,7 +59,7 @@ void RDKafkaPublisher::init(const std::string &bootstrap_server) {
 void RDKafkaPublisher::autoPoll() {
   while (!this->_stop_inner_thread) {
     std::this_thread::sleep_for(std::chrono::milliseconds(250));
-    flush(500);
+    flush(10);
   }
 }
 
