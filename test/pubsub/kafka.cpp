@@ -10,6 +10,8 @@ using namespace gateway::common;
 using namespace gateway::pubsub;
 using namespace gateway::pubsub::impl::kafka;
 
+#define TOPIC_TEST_NAME "queue-test"
+
 class Message : public PublishMessage
 {
     const std::string request_type;
@@ -42,7 +44,7 @@ TEST(Kafka, KafkaSimplePubSub)
 
     ASSERT_NO_THROW(producer->init("kafka:9092"));
     ASSERT_NO_THROW(consumer->init("kafka:9092"));
-
+    ASSERT_NO_THROW(consumer->setQueue({TOPIC_TEST_NAME}));
     ASSERT_EQ(consumer->getMsg(messages, 1, 1000), 0);
 
     auto iotaFuture = std::async(
@@ -54,7 +56,7 @@ TEST(Kafka, KafkaSimplePubSub)
                           std::move(
                               PublishMessageUniquePtr(
                                   new Message(
-                                      "queue-test",
+                                      TOPIC_TEST_NAME,
                                       message_sent)))),
                       0);
             ASSERT_EQ(producer->flush(1000), 0);
@@ -84,6 +86,7 @@ TEST(Kafka, KafkaPushMultipleMessage)
 
     ASSERT_NO_THROW(producer->init("kafka:9092"));
     ASSERT_NO_THROW(consumer->init("kafka:9092"));
+    ASSERT_NO_THROW(consumer->setQueue({TOPIC_TEST_NAME}));
     PublisherMessageVector push_messages;
     std::vector<std::string> message_to_sent;
     for (int idx = 0; idx < 10; idx++)
