@@ -19,6 +19,7 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib)
 set(CMAKE_BINARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
 
 set(COMMON_SOURCE_FILES
+  src/gateway/Gateway.cpp
   src/gateway/common/ProgramOptions.cpp  
 
   src/gateway/service/epics/EpicsChannel.cpp
@@ -27,7 +28,6 @@ set(COMMON_SOURCE_FILES
   src/gateway/service/pubsub/IPublisher.cpp
   src/gateway/service/pubsub/ISubscriber.cpp
 
-  src/gateway/service/pubsub/impl/PubSubBase.cpp
   src/gateway/service/pubsub/impl/kafka/RDKafkaBase.cpp
   src/gateway/service/pubsub/impl/kafka/RDKafkaPublisher.cpp
   src/gateway/service/pubsub/impl/kafka/RDKafkaSubscriber.cpp
@@ -37,7 +37,6 @@ set(COMMON_SOURCE_FILES
 
 set(SOURCE_FILES
     src/main.cpp
-    src/gateway/Gateway.cpp
     ${COMMON_SOURCE_FILES}
   )
 
@@ -63,6 +62,7 @@ TARGET_LINK_DIRECTORIES(${PROJECT_NAME} PUBLIC ${CMAKE_INSTALL_PREFIX}/lib)
 #-------------------------- Tests ---------------------
 set(TEST_SOURCE_FILES
     test/test.cpp
+    test/Gateway.cpp
     test/epics/epics.cpp
     test/pubsub/kafka.cpp
     test/common/ProgramOptions.cpp

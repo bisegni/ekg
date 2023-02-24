@@ -85,5 +85,6 @@
         "valarray": "cpp",
         "variant": "cpp",
         "*.ipp": "cpp"
-    }
+    },
+    "git.ignoreLimitWarning": true
 }
