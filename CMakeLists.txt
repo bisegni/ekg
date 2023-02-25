@@ -8,10 +8,12 @@ include(ExternalProject)
 
 set(CMAKE_CXX_STANDARD 20)
 set(BOOST_VERSION 1.77.0)
-set(EPICS_VERSION 7.0)
+set(EPICS_VERSION R7.0.7)
 set(PROTOBUF_VERSION v22.0)
 set(LIBLZ4_VERSION v1.9.2)
 set(LIBRDKAFKA_VERSION v2.0.2)
+set(SQLITE_VERSION master)
+set(SQLITEORM_VERSION v1.8.1)
 set(GTEST_VERSION 1.8.0)
 set(CMAKE_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib)
@@ -107,7 +109,7 @@ ExternalProject_Add (
     BUILD_IN_SOURCE 1
     GIT_SUBMODULES_RECURSE true
     UPDATE_COMMAND ${BOOST_BOOTSTRAP_CMD}
-    BUILD_COMMAND ${BOOST_BUILD_CMD} --with-system --with-program_options --with-log install --prefix=${CMAKE_INSTALL_PREFIX}
+    BUILD_COMMAND ${BOOST_BUILD_CMD} --with-system --with-program_options --with-log link=shared install --prefix=${CMAKE_INSTALL_PREFIX}
     INSTALL_COMMAND ""
     LOG_DOWNLOAD 1
     LOG_UPDATE 1
@@ -126,7 +128,7 @@ ExternalProject_Add(
  	epics
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/epics
  	GIT_REPOSITORY https://github.com/epics-base/epics-base.git
-  GIT_TAG origin/${EPICS_VERSION}
+  GIT_TAG ${EPICS_VERSION}
   GIT_PROGRESS 1
   BUILD_IN_SOURCE 1
   #PATCH_COMMAND ${PROJECT_SOURCE_DIR}/tools/epics_patch.sh ${CMAKE_CURRENT_BINARY_DIR}
@@ -238,6 +240,47 @@ SET(BUILD_LIBRARY ${BUILD_LIBRARY} rdkafka rdkafka++)
 ADD_DEPENDENCIES(librdkafa liblz4)
 ADD_DEPENDENCIES(${PROJECT_NAME} librdkafa liblz4)
 ADD_DEPENDENCIES(${PROJECT_NAME}-test librdkafa liblz4)
+
+#----------sqlite orm-----
+MESSAGE(STATUS "Configure sqlite version ${SQLITE_VERSION}")
+ExternalProject_Add(
+  sqlite_dist
+  GIT_TAG ${SQLITE_VERSION}
+  GIT_REPOSITORY https://github.com/azadkuh/sqlite-amalgamation.git
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/sqlite
+  CMAKE_ARGS
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}  
+    -DCMAKE_BUILD_TYPE=Release 
+  LOG_DOWNLOAD 1
+  LOG_UPDATE 1
+  LOG_CONFIGURE 1
+  LOG_BUILD 1
+  LOG_INSTALL 1
+)
+
+MESSAGE(STATUS "Configure sqlite orm version ${SQLITEORM_VERSION}")
+ExternalProject_Add(
+  sqlite_orm
+  GIT_TAG ${SQLITEORM_VERSION}
+  GIT_REPOSITORY https://github.com/fnc12/sqlite_orm.git
+  PREFIX ${CMAKE_CURRENT_BINARY_DIR}/sqlite_orm
+  CMAKE_ARGS
+    -DSQLITE_ORM_ENABLE_CXX_20=ON
+    -DBUILD_TESTING=OFF
+    -DBUILD_EXAMPLES=OFF
+    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}  
+    -DCMAKE_BUILD_TYPE=Release 
+  LOG_DOWNLOAD 1
+  LOG_UPDATE 1
+  LOG_CONFIGURE 1
+  LOG_BUILD 1
+  LOG_INSTALL 1
+)
+ADD_DEPENDENCIES(sqlite_orm sqlite_dist)
+SET(BUILD_LIBRARY ${BUILD_LIBRARY} sqlite3)
+ADD_DEPENDENCIES(${PROJECT_NAME}  sqlite_orm sqlite_dist)
+ADD_DEPENDENCIES(${PROJECT_NAME}-test sqlite_orm sqlite_dist)
+
 
 #--------Google Test------
 message (STATUS "Setup GTest version ${GTEST_VERSION}")
