@@ -6,14 +6,12 @@
 
 using namespace gateway::epics_impl;
 
-TEST(EpicsTest, ChannelFault) {
+TEST(Epics, ChannelFault) {
     std::unique_ptr<EpicsChannel> pc;
-    EXPECT_NO_THROW(pc = std::make_unique<EpicsChannel>("ca","bacd_channel_name"));
-    EXPECT_NO_THROW(pc->connect());
-    EXPECT_ANY_THROW(pc->getData());
+    EXPECT_ANY_THROW(pc = std::make_unique<EpicsChannel>("ca","bacd_channel_name"));
 }
 
-TEST(EpicsTest, ChannleOK) {
+TEST(Epics, ChannleOK) {
     std::unique_ptr<EpicsChannel> pc;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc = std::make_unique<EpicsChannel>("pva", "variable:sum"););
@@ -40,7 +38,7 @@ bool retry_eq(const EpicsChannel& channel,
     return false;
 }
 
-TEST(EpicsTest, ChannelGetSetTemplatedGet) {
+TEST(Epics, ChannelGetSetTemplatedGet) {
     std::unique_ptr<EpicsChannel> pc_sum;
     std::unique_ptr<EpicsChannel> pc_a;
     std::unique_ptr<EpicsChannel> pc_b;
@@ -59,7 +57,7 @@ TEST(EpicsTest, ChannelGetSetTemplatedGet) {
     EXPECT_EQ(retry_eq(*pc_sum, "value", 10, 500, 3), true);
 }
 
-TEST(EpicsTest, ChannelGetSetPVDatadGet) {
+TEST(Epics, ChannelGetSetPVDatadGet) {
     std::unique_ptr<EpicsChannel> pc_sum;
     std::unique_ptr<EpicsChannel> pc_a;
     std::unique_ptr<EpicsChannel> pc_b;
@@ -78,7 +76,7 @@ TEST(EpicsTest, ChannelGetSetPVDatadGet) {
     EXPECT_EQ(retry_eq(*pc_sum, "value", 10, 500, 3), true);
 }
 
-TEST(EpicsTest, ChannelMonitor) {
+TEST(Epics, ChannelMonitor) {
     std::unique_ptr<EpicsChannel> pc_a;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc_a = std::make_unique<EpicsChannel>("pva", "variable:a"););
@@ -112,7 +110,7 @@ void handler(const MonitorEventVecShrdPtr& event_data) {
     allEvent.insert(allEvent.end(), (*event_data).begin(), (*event_data).end());
 }
 
-TEST(EpicsTest, EpicsChannelMonitor) {
+TEST(Epics, EpicsChannelMonitor) {
     std::unique_ptr<EpicsChannelMonitor> monitor = std::make_unique<EpicsChannelMonitor>();
 
     EXPECT_NO_THROW(monitor->setHandler(std::bind(handler, std::placeholders::_1)););

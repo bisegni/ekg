@@ -24,7 +24,8 @@ void ProgramOptions::init()
     (LOG_ON_SYSLOG, po::value<bool>()->default_value(false), "Specify when the logger print in syslog server")
     (SYSLOG_SERVER, po::value<std::string>(), "Specify syslog hotsname")
     (SYSLOG_PORT, po::value<int>()->default_value(514), "Specify syslog server port")
-    (LOG_LEVEL, po::value<std::string>()->default_value("info"), "Specify the level of the log using the value [debug, info, notice, warning, fatal]");
+    (LOG_LEVEL, po::value<std::string>()->default_value("info"), "Specify the level of the log using the value [debug, info, notice, warning, fatal]")
+    (CMD_TOPIC_NAME, po::value<std::string>(), "Specify input topic where the gateway receive the configuration command");
 }
 
 void ProgramOptions::parse(int argc, const char *argv[])

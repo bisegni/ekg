@@ -15,6 +15,9 @@ static const char* const LOG_FILE_MAX_SIZE = "log-file-max-size";
 static const char* const LOG_ON_SYSLOG = "log-on-syslog";
 static const char* const SYSLOG_SERVER = "syslog-server";
 static const char* const SYSLOG_PORT = "syslog-port";
+
+static const char* const CMD_TOPIC_NAME = "cmd-input-topic";
+
 static const char* const LOG_LEVEL = "log-level";
 
 namespace gateway

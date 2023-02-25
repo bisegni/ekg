@@ -34,7 +34,7 @@ class EpicsChannel {
     epics::pvAccess::Configuration::shared_pointer conf = epics::pvAccess::ConfigurationBuilder()
                                                             .push_env()
                                                             .build();
-    pvac::ClientProvider provider;
+    std::unique_ptr<pvac::ClientProvider> provider;
     std::unique_ptr<pvac::ClientChannel> channel;
     pvac::MonitorSync mon;
 public:

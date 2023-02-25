@@ -10,8 +10,9 @@ namespace pva = epics::pvAccess;
 EpicsChannel::EpicsChannel(
     const std::string& provider_name,
     const std::string& channel_name):
-    channel_name(channel_name),
-    provider(provider_name, conf){}
+    channel_name(channel_name){
+        provider = std::make_unique<pvac::ClientProvider>(provider_name, conf);
+    }
 
 void EpicsChannel::init() {
     // "pva" provider automatically in registry
@@ -26,7 +27,7 @@ void EpicsChannel::deinit() {
 }
 
 void EpicsChannel::connect() {
-   channel = std::make_unique<pvac::ClientChannel>(provider.connect(channel_name));
+   channel = std::make_unique<pvac::ClientChannel>(provider->connect(channel_name));
 }
 
 pvd::PVStructure::const_shared_pointer
