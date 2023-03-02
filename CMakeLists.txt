@@ -12,7 +12,7 @@ set(EPICS_VERSION R7.0.7)
 set(PROTOBUF_VERSION v22.0)
 set(LIBLZ4_VERSION v1.9.2)
 set(LIBRDKAFKA_VERSION v2.0.2)
-set(SQLITE_VERSION master)
+set(SQLITE_VERSION version-3.41.0)
 set(SQLITEORM_VERSION v1.8.1)
 set(GTEST_VERSION 1.8.0)
 set(CMAKE_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
@@ -23,6 +23,9 @@ set(CMAKE_BINARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
 set(COMMON_SOURCE_FILES
   src/gateway/Gateway.cpp
   src/gateway/common/ProgramOptions.cpp  
+
+  src/gateway/service/data/DataStorage.cpp
+  src/gateway/service/data/repository/ChannelRepository.cpp
 
   src/gateway/service/epics/EpicsChannel.cpp
   src/gateway/service/epics/EpicsChannelMonitor.cpp
@@ -65,6 +68,7 @@ TARGET_LINK_DIRECTORIES(${PROJECT_NAME} PUBLIC ${CMAKE_INSTALL_PREFIX}/lib)
 set(TEST_SOURCE_FILES
     test/test.cpp
     test/Gateway.cpp
+    test/data/data_storage.cpp
     test/epics/epics.cpp
     test/pubsub/kafka.cpp
     test/common/ProgramOptions.cpp
@@ -245,17 +249,12 @@ ADD_DEPENDENCIES(${PROJECT_NAME}-test librdkafa liblz4)
 MESSAGE(STATUS "Configure sqlite version ${SQLITE_VERSION}")
 ExternalProject_Add(
   sqlite_dist
-  GIT_TAG ${SQLITE_VERSION}
-  GIT_REPOSITORY https://github.com/azadkuh/sqlite-amalgamation.git
   PREFIX ${CMAKE_CURRENT_BINARY_DIR}/sqlite
-  CMAKE_ARGS
-    -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}  
-    -DCMAKE_BUILD_TYPE=Release 
-  LOG_DOWNLOAD 1
-  LOG_UPDATE 1
-  LOG_CONFIGURE 1
-  LOG_BUILD 1
-  LOG_INSTALL 1
+  GIT_TAG ${SQLITE_VERSION}
+  GIT_REPOSITORY https://github.com/sqlite/sqlite.git
+  BUILD_IN_SOURCE 1
+  CONFIGURE_COMMAND ${CMAKE_CURRENT_BINARY_DIR}/sqlite/src/sqlite_dist/configure --enable-tempstore=yes --prefix=${CMAKE_INSTALL_PREFIX}
+  INSTALL_COMMAND  make install
 )
 
 MESSAGE(STATUS "Configure sqlite orm version ${SQLITEORM_VERSION}")
