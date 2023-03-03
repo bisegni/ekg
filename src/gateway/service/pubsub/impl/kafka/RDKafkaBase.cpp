@@ -1,6 +1,6 @@
 #include <gateway/service/pubsub/impl/kafka/RDKafkaBase.h>
 
-using namespace gateway::pubsub::impl::kafka;
+using namespace gateway::service::pubsub::impl::kafka;
 
 RDKafkaBase::RDKafkaBase(): 
     conf(RdKafka::Conf::create(RdKafka::Conf::CONF_GLOBAL)),

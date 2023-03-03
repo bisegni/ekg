@@ -22,10 +22,11 @@ namespace gateway
 
             typedef enum class LogLevel
             {
+                ERROR,
                 INFO,
                 DEBUG,
                 FATAL
-            }LogLevel;
+            } LogLevel;
 
             class ILogger
             {

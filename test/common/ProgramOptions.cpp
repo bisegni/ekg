@@ -8,6 +8,7 @@
 #include <gateway/common/ProgramOptions.h>
 
 using namespace gateway::common;
+namespace fs = std::filesystem;
 
 TEST(ProgramOptions, CPPStandardOptions)
 {
@@ -16,7 +17,6 @@ TEST(ProgramOptions, CPPStandardOptions)
     // set environment variable for test
     setenv("EPICS_GATEWAY_log-level", "debug", 1);
     std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
-    opt->init();
     opt->parse(argc, argv);
     auto log_level = opt->getOption<std::string>("log-level");
     EXPECT_STREQ(log_level.c_str(), "debug");
@@ -36,7 +36,6 @@ TEST(ProgramOptions, LogConfiguration)
     setenv(std::string("EPICS_GATEWAY_").append(SYSLOG_SERVER).c_str(), "syslog-server", 1);
     setenv(std::string("EPICS_GATEWAY_").append(SYSLOG_PORT).c_str(), "5678", 1);
     std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
-    opt->init();
     opt->parse(argc, argv);
     auto logger_configuration = opt->getloggerConfiguration();
     EXPECT_EQ(logger_configuration->log_on_console, true);
@@ -53,10 +52,10 @@ TEST(ProgramOptions, FileConfiguration)
     int argc = 1;
     const char *argv[1] = {"epics-gateway-test"};
     // set environment variable for test
+    const std::string lcoation = fs::path(fs::current_path()) / "test/common/test-conf-file.conf";
     setenv("EPICS_GATEWAY_conf-file", "true", 1);
-    setenv("EPICS_GATEWAY_conf-file-name", "/workspace/test/common/test-conf-file.conf", 1);
+    setenv("EPICS_GATEWAY_conf-file-name", lcoation.c_str(), 1);
     std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
-    opt->init();
     EXPECT_NO_THROW(opt->parse(argc, argv););
     auto logger_configuration = opt->getloggerConfiguration();
     EXPECT_EQ(logger_configuration->log_on_console, true);
@@ -76,7 +75,6 @@ TEST(ProgramOptions, FileConfigurationNoPathSpecified)
     setenv("EPICS_GATEWAY_conf-file", "true", 1);
     setenv("EPICS_GATEWAY_conf-file-name", "", 1);
     std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
-    opt->init();
     ASSERT_THROW(opt->parse(argc, argv), std::runtime_error);
 }
 
@@ -88,6 +86,5 @@ TEST(ProgramOptions, FileConfigurationBadPath)
     setenv("EPICS_GATEWAY_conf-file", "true", 1);
     setenv("EPICS_GATEWAY_conf-file-name", "/bad/file/path", 1);
     std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
-    opt->init();
     ASSERT_THROW(opt->parse(argc, argv), std::runtime_error);
 }

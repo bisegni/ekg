@@ -8,9 +8,7 @@
 #include <functional>
 
 #pragma once
-namespace gateway
-{
-    namespace pubsub
+namespace gateway::service::pubsub
     {
         /*
         * Message publish interface *implementation need to internally manage the implmenetaion instance
@@ -46,8 +44,10 @@ namespace gateway
         protected:
             MapEvtHndlrForReqType eventCallbackForReqType;
         public:
-            IPublisher();
-            virtual ~IPublisher();
+            IPublisher() = default;
+            virtual ~IPublisher() = default;
+            virtual void init() = 0;
+            virtual void deinit() = 0;
             virtual void setAutoPoll(bool autopoll) = 0;
             //! PublisherInterface initialization
             virtual int setCallBackForReqType(const std::string req_type, EventCallback eventCallback);
@@ -59,6 +59,5 @@ namespace gateway
         };
 
     }
-}
 
 #endif

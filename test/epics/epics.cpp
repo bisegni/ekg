@@ -11,10 +11,19 @@ TEST(Epics, ChannelFault) {
     EXPECT_ANY_THROW(pc = std::make_unique<EpicsChannel>("ca","bacd_channel_name"));
 }
 
-TEST(Epics, ChannleOK) {
+TEST(Epics, ChannelOK) {
     std::unique_ptr<EpicsChannel> pc;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc = std::make_unique<EpicsChannel>("pva", "variable:sum"););
+    EXPECT_NO_THROW(pc->connect());
+    EXPECT_NO_THROW(val = pc->getData(););
+    EXPECT_NE(val, nullptr);
+}
+
+TEST(Epics, ChannelOKWithAddress) {
+    std::unique_ptr<EpicsChannel> pc;
+    epics::pvData::PVStructure::const_shared_pointer val;
+    EXPECT_NO_THROW(pc = std::make_unique<EpicsChannel>("pva", "variable:sum", "epics"););
     EXPECT_NO_THROW(pc->connect());
     EXPECT_NO_THROW(val = pc->getData(););
     EXPECT_NE(val, nullptr);

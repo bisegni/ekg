@@ -9,7 +9,7 @@
 
 #include <gateway/service/pubsub/IPublisher.h>
 #include <gateway/service/pubsub/impl/kafka/RDKafkaBase.h>
-namespace gateway::pubsub::impl::kafka
+namespace gateway::service::pubsub::impl::kafka
 {
     class RDKafkaPublisher : public IPublisher, RDKafkaBase, RdKafka::DeliveryReportCb
     {
@@ -17,17 +17,17 @@ namespace gateway::pubsub::impl::kafka
         bool _auto_poll;
         std::thread auto_poll_thread;
         std::unique_ptr<RdKafka::Producer> producer;
-
+        const std::string bootstrap_server;
     protected:
         void dr_cb(RdKafka::Message &message);
         void autoPoll();
 
     public:
-        explicit RDKafkaPublisher();
+        explicit RDKafkaPublisher(const std::string &bootstrap_server);
         virtual ~RDKafkaPublisher();
         virtual int createQueue(const std::string &queue);
         virtual void setAutoPoll(bool autopoll);
-        virtual void init(const std::string &bootstrap_server);
+        virtual void init();
         virtual void deinit();
         virtual int flush(const int timeo = 10000);
         virtual int pushMessage(PublishMessageUniquePtr message);

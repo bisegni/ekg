@@ -7,8 +7,8 @@
 #include <thread>
 
 using namespace gateway::common;
-using namespace gateway::pubsub;
-using namespace gateway::pubsub::impl::kafka;
+using namespace gateway::service::pubsub;
+using namespace gateway::service::pubsub::impl::kafka;
 
 #define TOPIC_TEST_NAME "queue-test"
 
@@ -37,13 +37,13 @@ public:
 TEST(Kafka, KafkaSimplePubSub)
 {
     SubscriberInterfaceElementVector messages;
-    std::unique_ptr<RDKafkaPublisher> producer = std::make_unique<RDKafkaPublisher>();
-    std::unique_ptr<RDKafkaSubscriber> consumer = std::make_unique<RDKafkaSubscriber>();
+    std::unique_ptr<RDKafkaPublisher> producer = std::make_unique<RDKafkaPublisher>("kafka:9092");
+    std::unique_ptr<RDKafkaSubscriber> consumer = std::make_unique<RDKafkaSubscriber>("kafka:9092");
 
     std::string message_sent = "hello_" + UUID::generateUUIDLite();
 
-    ASSERT_NO_THROW(producer->init("kafka:9092"));
-    ASSERT_NO_THROW(consumer->init("kafka:9092"));
+    ASSERT_NO_THROW(producer->init());
+    ASSERT_NO_THROW(consumer->init());
     ASSERT_NO_THROW(consumer->setQueue({TOPIC_TEST_NAME}));
     ASSERT_EQ(consumer->getMsg(messages, 1, 1000), 0);
 
@@ -81,11 +81,11 @@ TEST(Kafka, KafkaPushMultipleMessage)
 {
     SubscriberInterfaceElementVector tmp_received_messages;
     SubscriberInterfaceElementVector received_messages;
-    std::unique_ptr<RDKafkaPublisher> producer = std::make_unique<RDKafkaPublisher>();
-    std::unique_ptr<RDKafkaSubscriber> consumer = std::make_unique<RDKafkaSubscriber>();
+    std::unique_ptr<RDKafkaPublisher> producer = std::make_unique<RDKafkaPublisher>("kafka:9092");
+    std::unique_ptr<RDKafkaSubscriber> consumer = std::make_unique<RDKafkaSubscriber>("kafka:9092");
 
-    ASSERT_NO_THROW(producer->init("kafka:9092"));
-    ASSERT_NO_THROW(consumer->init("kafka:9092"));
+    ASSERT_NO_THROW(producer->init());
+    ASSERT_NO_THROW(consumer->init());
     ASSERT_NO_THROW(consumer->setQueue({TOPIC_TEST_NAME}));
     PublisherMessageVector push_messages;
     std::vector<std::string> message_to_sent;

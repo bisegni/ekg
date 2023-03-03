@@ -1,10 +1,6 @@
 #include <gateway/service/pubsub/IPublisher.h>
 
-using namespace gateway::pubsub;
-
-IPublisher::IPublisher(){}
-
-IPublisher::~IPublisher() {}
+using namespace gateway::service::pubsub;
 
 int IPublisher::setCallBackForReqType(const std::string req_type, EventCallback eventCallback) {
     auto ret = eventCallbackForReqType.insert(MapEvtHndlrForReqTypePair(req_type, eventCallback));

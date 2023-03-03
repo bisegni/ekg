@@ -1,10 +1,10 @@
 #include <gateway/service/pubsub/impl/kafka/RDKafkaPublisher.h>
 
 
-using namespace gateway::pubsub::impl::kafka;
+using namespace gateway::service::pubsub::impl::kafka;
 
-RDKafkaPublisher::RDKafkaPublisher()
-    : IPublisher(), RDKafkaBase(), _stop_inner_thread(false), _auto_poll(false) {}
+RDKafkaPublisher::RDKafkaPublisher(const std::string &bootstrap_server)
+    : IPublisher(), RDKafkaBase(), _stop_inner_thread(false), _auto_poll(false), bootstrap_server(bootstrap_server) {}
 
 RDKafkaPublisher::~RDKafkaPublisher() {}
 
@@ -39,7 +39,7 @@ void RDKafkaPublisher::dr_cb(RdKafka::Message &message) {
   }
 }
 
-void RDKafkaPublisher::init(const std::string &bootstrap_server) {
+void RDKafkaPublisher::init() {
   std::string                       errstr;
 
   // RDK_CONF_SET(conf, "debug", "cgrp,topic,fetch,protocol", RDK_PUB_ERR_)
