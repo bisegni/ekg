@@ -4,10 +4,8 @@
 #include <string>
 #include <vector>
 #include <map>
-namespace gateway
+namespace gateway::common
 {
-    namespace common
-    {
 #define DEFINE_VECTOR_FOR_TYPE(t, n)              \
     typedef std::vector<t> n;                     \
     typedef std::vector<t>::iterator n##Iterator; \
@@ -20,6 +18,5 @@ namespace gateway
     typedef std::pair<t1, t2> n##Pair;
 
     DEFINE_VECTOR_FOR_TYPE(std::string, StringVector);
-    }
 }
 #endif // __TYPES_H__

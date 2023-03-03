@@ -12,7 +12,6 @@ using namespace gateway::service::log::impl;
 #define BASE_LOG_FORMAT "[%TimeStamp%][%Severity%]: %_%"
 #define EXTENDEND_LOG_FORMAT "[%TimeStamp%][%Severity%][%ProcessID%][%ThreadID%]: %_%"
 
-
 BoostLogger::BoostLogger(std::shared_ptr<const LogConfiguration> configuration) : ILogger(configuration)
 {
     logging::add_common_attributes();
@@ -25,8 +24,8 @@ BoostLogger::BoostLogger(std::shared_ptr<const LogConfiguration> configuration) 
 
     if (configuration->log_on_file)
     {
-        file_sink = logging::add_file_log(keywords::file_name = configuration->log_file_name,                                     // file name pattern
-                                          keywords::rotation_size = configuration->log_file_max_size_mb * 1024 * 1024,            // rotate files every 10 MiB...
+        file_sink = logging::add_file_log(keywords::file_name = configuration->log_file_name,                                    // file name pattern
+                                          keywords::rotation_size = configuration->log_file_max_size_mb * 1024 * 1024,           // rotate files every 10 MiB...
                                           keywords::time_based_rotation = logging::sinks::file::rotation_at_time_point(0, 0, 0), // ...or at midnight
                                           keywords::format = EXTENDEND_LOG_FORMAT,
                                           keywords::auto_flush = true);
@@ -76,6 +75,9 @@ logging::trivial::severity_level BoostLogger::getLevel(LogLevel level)
 
     switch (level)
     {
+    case LogLevel::ERROR:
+        boost_level = logging::trivial::error;
+        break;
     case LogLevel::INFO:
         boost_level = logging::trivial::info;
         break;

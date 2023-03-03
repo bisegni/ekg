@@ -5,16 +5,16 @@
 #include <chrono>
 
 using namespace gateway::common;
-using namespace gateway::pubsub::impl::kafka;
+using namespace gateway::service::pubsub::impl::kafka;
 
-RDKafkaSubscriber::RDKafkaSubscriber()
-    : ISubscriber(), RDKafkaBase() {}
+RDKafkaSubscriber::RDKafkaSubscriber(
+    const std::string &bootstrap_server,
+    const std::string &group_id)
+    : ISubscriber(), RDKafkaBase(), bootstrap_server(bootstrap_server), group_id(group_id) {}
 
 RDKafkaSubscriber::~RDKafkaSubscriber() {}
 
-void RDKafkaSubscriber::init(
-    const std::string &bootstrap_server,
-    const std::string &group_id)
+void RDKafkaSubscriber::init()
 {
     std::string errstr;
     // setting properties
@@ -138,7 +138,7 @@ int RDKafkaSubscriber::internalConsume(std::unique_ptr<RdKafka::Message> message
     std::memcpy(buffer.get(), message->payload(), len);
 
     messages.push_back(
-        std::make_shared<SubscriberInterfaceElement>(
+        std::make_shared<const SubscriberInterfaceElement>(
             SubscriberInterfaceElement{
                 *message->key(),
                 len,

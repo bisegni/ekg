@@ -2,7 +2,6 @@
 
 #include <string>
 #include <ostream>
-#include <regex>
 #include <algorithm>
 #include <fstream>
 #include <iostream>
@@ -10,9 +9,10 @@
 
 using namespace gateway::common;
 using namespace gateway::service::log;
+using namespace gateway::controller;
 namespace po = boost::program_options;
 
-void ProgramOptions::init()
+ProgramOptions::ProgramOptions()
 {
     options.add_options()("help", "Show all the options")
     (CONF_FILE, po::value<bool>()->default_value(false), "Specify if we need to load configuration from file")
@@ -25,12 +25,12 @@ void ProgramOptions::init()
     (SYSLOG_SERVER, po::value<std::string>(), "Specify syslog hotsname")
     (SYSLOG_PORT, po::value<int>()->default_value(514), "Specify syslog server port")
     (LOG_LEVEL, po::value<std::string>()->default_value("info"), "Specify the level of the log using the value [debug, info, notice, warning, fatal]")
-    (CMD_TOPIC_NAME, po::value<std::string>(), "Specify input topic where the gateway receive the configuration command");
+    (MESSAGE_BUS_ADDRESS, po::value<std::string>(), "Specify the messages address")
+    (CMD_INPUT_TOPIC, po::value<std::string>(), "Specify the messages bus's queue where the gateway receive the configuration command");
 }
 
 void ProgramOptions::parse(int argc, const char *argv[])
 {
-    const std::regex r("EPICS_GATEWAY_(.*)");
     try
     {
         po::store(
@@ -86,15 +86,25 @@ bool ProgramOptions::optionConfigure(const std::string &name)
 #define GET_OPTION(opt, type, def) \
     optionConfigure(opt) ? getOption<type>(opt) : def
 
-std::shared_ptr<const LogConfiguration> ProgramOptions::getloggerConfiguration()
+std::shared_ptr<const LogConfiguration> 
+ProgramOptions::getloggerConfiguration()
 {
     return std::make_shared<const LogConfiguration>(
         LogConfiguration{
-            GET_OPTION(LOG_ON_CONSOLE, bool, false),
-            GET_OPTION(LOG_ON_FILE, bool, false),
-            GET_OPTION(LOG_FILE_NAME, std::string, ""),
-            GET_OPTION(LOG_FILE_MAX_SIZE, int, 1),
-            GET_OPTION(LOG_ON_SYSLOG, bool, false),
-            GET_OPTION(SYSLOG_SERVER, std::string, ""),
-            GET_OPTION(SYSLOG_PORT, int, 514)});
+            .log_on_console = GET_OPTION(LOG_ON_CONSOLE, bool, false),
+            .log_on_file = GET_OPTION(LOG_ON_FILE, bool, false),
+            .log_file_name = GET_OPTION(LOG_FILE_NAME, std::string, ""),
+            .log_file_max_size_mb = GET_OPTION(LOG_FILE_MAX_SIZE, int, 1),
+            .log_on_syslog = GET_OPTION(LOG_ON_SYSLOG, bool, false),
+            .log_syslog_srv = GET_OPTION(SYSLOG_SERVER, std::string, ""),
+            .log_syslog_srv_port = GET_OPTION(SYSLOG_PORT, int, 514)});
+}
+
+CMDControllerConfigUPtr 
+ProgramOptions::getCMDControllerConfiguration() {
+    return std::make_unique<const CMDControllerConfig>(
+        CMDControllerConfig{
+            .message_bus_address = GET_OPTION(MESSAGE_BUS_ADDRESS, std::string, ""),
+            .topic_in = GET_OPTION(CMD_INPUT_TOPIC, std::string, "")
+        });
 }

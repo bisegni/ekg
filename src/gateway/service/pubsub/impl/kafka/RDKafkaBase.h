@@ -20,7 +20,7 @@
         }                                                             \
     }
 
-namespace gateway::pubsub::impl::kafka
+namespace gateway::service::pubsub::impl::kafka
 {
     class RDKafkaBase
     {

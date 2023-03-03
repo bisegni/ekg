@@ -18,7 +18,7 @@ namespace gateway
             static void registerService(std::shared_ptr<T> object) {
                 registered_instance = object;
             }
-            static T resolve() {
+            static std::shared_ptr<T> resolve() {
                 return registered_instance;
             }
         };

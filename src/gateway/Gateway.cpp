@@ -16,7 +16,6 @@ int Gateway::setup(int argc, const char *argv[])
     int err = 0;
     std::shared_ptr<ILogger> logger;
     try {
-        po->init();
         po->parse(argc, argv);
         // setup logger
         ServiceResolver<ILogger>::registerService(logger = std::make_shared<BoostLogger>(po->getloggerConfiguration()));

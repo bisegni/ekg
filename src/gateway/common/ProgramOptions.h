@@ -3,6 +3,7 @@
 
 #include <boost/program_options.hpp>
 #include <gateway/service/log/ILogger.h>
+#include <gateway/controller/CMDController.h>
 
 namespace po = boost::program_options;
 
@@ -16,7 +17,8 @@ static const char* const LOG_ON_SYSLOG = "log-on-syslog";
 static const char* const SYSLOG_SERVER = "syslog-server";
 static const char* const SYSLOG_PORT = "syslog-port";
 
-static const char* const CMD_TOPIC_NAME = "cmd-input-topic";
+static const char* const MESSAGE_BUS_ADDRESS = "message-bus-address";
+static const char* const CMD_INPUT_TOPIC = "cmd-input-topic";
 
 static const char* const LOG_LEVEL = "log-level";
 
@@ -33,13 +35,12 @@ namespace gateway
             po::options_description options{"Epics Gateway"};
 
         public:
-            ProgramOptions() = default;
+            ProgramOptions();
             ~ProgramOptions() = default;
-            void init();
             void parse(int argc, const char *argv[]);
 
             std::shared_ptr<const gateway::service::log::LogConfiguration> getloggerConfiguration();
-
+            gateway::controller::CMDControllerConfigUPtr getCMDControllerConfiguration();
             bool optionConfigure(const std::string &name);
 
             template <class T>

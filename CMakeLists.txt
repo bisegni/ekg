@@ -6,6 +6,8 @@ ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 include(ExternalProject)
 
+set(IS_DEBUG_BUILD CMAKE_BUILD_TYPE STREQUAL "Debug")
+
 set(CMAKE_CXX_STANDARD 20)
 set(BOOST_VERSION 1.77.0)
 set(EPICS_VERSION R7.0.7)
@@ -19,6 +21,11 @@ set(CMAKE_BINARY_DIR ${CMAKE_INSTALL_PREFIX}/bin)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/lib)
 set(CMAKE_BINARY_OUTPUT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/bin)
+
+if (${IS_DEBUG_BUILD})
+    MESSAGE(STATUS "Add debug macro __DEBUG__")
+    add_compile_definitions(__DEBUG__)
+endif ()
 
 set(COMMON_SOURCE_FILES
   src/gateway/Gateway.cpp
@@ -38,6 +45,9 @@ set(COMMON_SOURCE_FILES
   src/gateway/service/pubsub/impl/kafka/RDKafkaSubscriber.cpp
 
   src/gateway/service/log/impl/BoostLogger.cpp
+
+  src/gateway/controller/CMDController.cpp
+  src/gateway/controller/CMDCommand.cpp
   )
 
 set(SOURCE_FILES
@@ -68,10 +78,11 @@ TARGET_LINK_DIRECTORIES(${PROJECT_NAME} PUBLIC ${CMAKE_INSTALL_PREFIX}/lib)
 set(TEST_SOURCE_FILES
     test/test.cpp
     test/Gateway.cpp
-    test/data/data_storage.cpp
+    test/data/DataStorage.cpp
     test/epics/epics.cpp
     test/pubsub/kafka.cpp
     test/common/ProgramOptions.cpp
+    test/controller/CMDController.cpp
     ${COMMON_SOURCE_FILES}
     )
 
@@ -113,7 +124,7 @@ ExternalProject_Add (
     BUILD_IN_SOURCE 1
     GIT_SUBMODULES_RECURSE true
     UPDATE_COMMAND ${BOOST_BOOTSTRAP_CMD}
-    BUILD_COMMAND ${BOOST_BUILD_CMD} --with-system --with-program_options --with-log link=shared install --prefix=${CMAKE_INSTALL_PREFIX}
+    BUILD_COMMAND ${BOOST_BUILD_CMD} --with-system --with-program_options --with-log --with-json link=shared install --prefix=${CMAKE_INSTALL_PREFIX}
     INSTALL_COMMAND ""
     LOG_DOWNLOAD 1
     LOG_UPDATE 1
@@ -122,7 +133,7 @@ ExternalProject_Add (
     LOG_INSTALL 1
     )
 
-SET(BUILD_LIBRARY ${BUILD_LIBRARY} boost_program_options boost_log boost_log_setup boost_thread)
+SET(BUILD_LIBRARY ${BUILD_LIBRARY} boost_program_options boost_log boost_log_setup boost_thread boost_json)
 ADD_DEPENDENCIES(${PROJECT_NAME} boost)
 ADD_DEPENDENCIES(${PROJECT_NAME}-test boost)
 

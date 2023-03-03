@@ -30,6 +30,7 @@ typedef std::shared_ptr<MonitorEventVec> MonitorEventVecShrdPtr;
 
 class EpicsChannel {
     const std::string channel_name;
+    const std::string address;
     epics::pvData::PVStructure::shared_pointer pvReq = epics::pvData::createRequest("field()");
     epics::pvAccess::Configuration::shared_pointer conf = epics::pvAccess::ConfigurationBuilder()
                                                             .push_env()
@@ -40,7 +41,8 @@ class EpicsChannel {
 public:
 explicit EpicsChannel(
     const std::string& provider_name,
-    const std::string& channel_name
+    const std::string& channel_name,
+    const std::string& address = std::string()
     );
 ~EpicsChannel() = default;
 static void init();
