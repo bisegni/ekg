@@ -1,10 +1,10 @@
 #include <iostream>
 #include <iomanip>
 #include <cstdlib>
-#include <gateway/Gateway.h>
+#include <ekg/EKGateway.h>
 
 int main(int argc, char *argv[])
 {
-    gateway::Gateway g;
-    return g.run(argc, argv);
+    ekg::EKGateway g;
+    return g.run(argc, const_cast<const char **>(argv));
 }

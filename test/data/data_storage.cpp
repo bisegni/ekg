@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include <gateway/common/utility.h>
-#include <gateway/service/data/DataStorage.h>
+#include <ekg/common/utility.h>
+#include <ekg/service/data/DataStorage.h>
 
 #include <filesystem>
 #include <vector>
@@ -8,9 +8,9 @@
 #include <latch>
 
 namespace fs = std::filesystem;
-using namespace gateway::common;
-using namespace gateway::service::data;
-using namespace gateway::service::data::repository;
+using namespace ekg::common;
+using namespace ekg::service::data;
+using namespace ekg::service::data::repository;
 
 TEST(DataStorage, Default)
 {

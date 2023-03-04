@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
-#include <gateway/service/pubsub/pubsub.h>
-#include <gateway/common/uuid.h>
+#include <ekg/service/pubsub/pubsub.h>
+#include <ekg/common/uuid.h>
 #include <unistd.h>
 #include <chrono>
 #include <future>
 #include <thread>
 
-using namespace gateway::common;
-using namespace gateway::service::pubsub;
-using namespace gateway::service::pubsub::impl::kafka;
+using namespace ekg::common;
+using namespace ekg::service::pubsub;
+using namespace ekg::service::pubsub::impl::kafka;
 
 #define TOPIC_TEST_NAME "queue-test"
 

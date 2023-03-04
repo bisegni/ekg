@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.2)
-project(epics-gateway)
+project(ekg)
 IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   SET(CMAKE_INSTALL_PREFIX ${CMAKE_CURRENT_BINARY_DIR}/local CACHE PATH "default install directory" FORCE)
 ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -28,26 +28,26 @@ if (${IS_DEBUG_BUILD})
 endif ()
 
 set(COMMON_SOURCE_FILES
-  src/gateway/Gateway.cpp
-  src/gateway/common/ProgramOptions.cpp  
+  src/ekg/EKGateway.cpp
+  src/ekg/common/ProgramOptions.cpp  
 
-  src/gateway/service/data/DataStorage.cpp
-  src/gateway/service/data/repository/ChannelRepository.cpp
+  src/ekg/service/data/DataStorage.cpp
+  src/ekg/service/data/repository/ChannelRepository.cpp
 
-  src/gateway/service/epics/EpicsChannel.cpp
-  src/gateway/service/epics/EpicsChannelMonitor.cpp
+  src/ekg/service/epics/EpicsChannel.cpp
+  src/ekg/service/epics/EpicsChannelMonitor.cpp
 
-  src/gateway/service/pubsub/IPublisher.cpp
-  src/gateway/service/pubsub/ISubscriber.cpp
+  src/ekg/service/pubsub/IPublisher.cpp
+  src/ekg/service/pubsub/ISubscriber.cpp
 
-  src/gateway/service/pubsub/impl/kafka/RDKafkaBase.cpp
-  src/gateway/service/pubsub/impl/kafka/RDKafkaPublisher.cpp
-  src/gateway/service/pubsub/impl/kafka/RDKafkaSubscriber.cpp
+  src/ekg/service/pubsub/impl/kafka/RDKafkaBase.cpp
+  src/ekg/service/pubsub/impl/kafka/RDKafkaPublisher.cpp
+  src/ekg/service/pubsub/impl/kafka/RDKafkaSubscriber.cpp
 
-  src/gateway/service/log/impl/BoostLogger.cpp
+  src/ekg/service/log/impl/BoostLogger.cpp
 
-  src/gateway/controller/CMDController.cpp
-  src/gateway/controller/CMDCommand.cpp
+  src/ekg/controller/CMDController.cpp
+  src/ekg/controller/CMDCommand.cpp
   )
 
 set(SOURCE_FILES
@@ -62,7 +62,7 @@ ADD_EXECUTABLE(
 
 set_target_properties(${PROJECT_NAME}
     PROPERTIES
-    PUBLIC_HEADER "${EPICS_GATEWAY_INCLUDE}"
+    PUBLIC_HEADER "${EPICS_ekg_INCLUDE}"
 )
 install(TARGETS ${PROJECT_NAME}
         RUNTIME DESTINATION bin
@@ -77,7 +77,7 @@ TARGET_LINK_DIRECTORIES(${PROJECT_NAME} PUBLIC ${CMAKE_INSTALL_PREFIX}/lib)
 #-------------------------- Tests ---------------------
 set(TEST_SOURCE_FILES
     test/test.cpp
-    test/Gateway.cpp
+    test/EKGateway.cpp
     test/data/DataStorage.cpp
     test/epics/epics.cpp
     test/pubsub/kafka.cpp
@@ -176,37 +176,37 @@ TARGET_LINK_DIRECTORIES(${PROJECT_NAME} PUBLIC ${CMAKE_INSTALL_PREFIX}/lib/linux
 TARGET_LINK_DIRECTORIES(${PROJECT_NAME}-test PUBLIC ${CMAKE_INSTALL_PREFIX}/lib/linux-x86_64)
 
 #--------------------protobuf--------------------------
-MESSAGE(STATUS "Configure protobuf version ${PROTOBUF_VERSION}")
-ExternalProject_Add(
-    protobuf
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/protobuf
- 	  GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
-    GIT_TAG ${PROTOBUF_VERSION}
-    GIT_PROGRESS 1
-    LOG_DOWNLOAD 1
-    LOG_UPDATE 1
-    LOG_CONFIGURE 1
-    LOG_BUILD 1
-    LOG_INSTALL 1
-    CMAKE_ARGS 
-      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-  )
-SET(BUILD_LIBRARY ${BUILD_LIBRARY} )
-ADD_DEPENDENCIES(${PROJECT_NAME} protobuf)
-ADD_DEPENDENCIES(${PROJECT_NAME}-test protobuf)
+# MESSAGE(STATUS "Configure protobuf version ${PROTOBUF_VERSION}")
+# ExternalProject_Add(
+#     protobuf
+#     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/protobuf
+#  	  GIT_REPOSITORY https://github.com/protocolbuffers/protobuf.git
+#     GIT_TAG ${PROTOBUF_VERSION}
+#     GIT_PROGRESS 1
+#     LOG_DOWNLOAD 1
+#     LOG_UPDATE 1
+#     LOG_CONFIGURE 1
+#     LOG_BUILD 1
+#     LOG_INSTALL 1
+#     CMAKE_ARGS 
+#       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+#   )
+# SET(BUILD_LIBRARY ${BUILD_LIBRARY} )
+# ADD_DEPENDENCIES(${PROJECT_NAME} protobuf)
+# ADD_DEPENDENCIES(${PROJECT_NAME}-test protobuf)
 #------------Nuraft----------------
-MESSAGE(STATUS "Configure NuRAFT")
-ExternalProject_Add(
-  nuraft
-    PREFIX ${CMAKE_CURRENT_BINARY_DIR}/nuraft
- 	  GIT_REPOSITORY https://github.com/bisegni/NuRaft.git
-    GIT_TAG feature/asio-module
-    CMAKE_ARGS 
-      -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
-  )
-SET(BUILD_LIBRARY ${BUILD_LIBRARY} )
-ADD_DEPENDENCIES(${PROJECT_NAME} nuraft)
-ADD_DEPENDENCIES(${PROJECT_NAME}-test nuraft)
+# MESSAGE(STATUS "Configure NuRAFT")
+# ExternalProject_Add(
+#   nuraft
+#     PREFIX ${CMAKE_CURRENT_BINARY_DIR}/nuraft
+#  	  GIT_REPOSITORY https://github.com/bisegni/NuRaft.git
+#     GIT_TAG feature/asio-module
+#     CMAKE_ARGS 
+#       -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}
+#   )
+# SET(BUILD_LIBRARY ${BUILD_LIBRARY} )
+# ADD_DEPENDENCIES(${PROJECT_NAME} nuraft)
+# ADD_DEPENDENCIES(${PROJECT_NAME}-test nuraft)
 
 #----------------kafka------------------
 MESSAGE(STATUS "Configure liblz4 version ${LIBLZ4_VERSION}")
@@ -222,9 +222,6 @@ ExternalProject_Add(
     -DBUILD_STATIC_LIBS=OFF
     -DBUILD_SHARED_LIBS=ON
     -DCMAKE_POSITION_INDEPENDENT_CODE=ON 
-  #  -DCMAKE_CXX_STANDARD=11
-  #  -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER} 
-  #  -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
   LOG_DOWNLOAD ON
   LOG_CONFIGURE ON
   LOG_BUILD ON
@@ -243,8 +240,6 @@ ExternalProject_Add(
     -DRDKAFKA_BUILD_TESTS=OFF 
     -DCMAKE_INSTALL_PREFIX:PATH=${CMAKE_INSTALL_PREFIX}  
     -DCMAKE_BUILD_TYPE=Release 
-    # -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
-    # -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
   LOG_DOWNLOAD 1
   LOG_UPDATE 1
   LOG_CONFIGURE 1
