@@ -1,10 +1,10 @@
 #include <gtest/gtest.h>
-#include <gateway/service/epics/EpicsChannel.h>
-#include <gateway/service/epics/EpicsChannelMonitor.h>
+#include <ekg/service/epics/EpicsChannel.h>
+#include <ekg/service/epics/EpicsChannelMonitor.h>
 #include <thread>
 #include <chrono>
 
-using namespace gateway::epics_impl;
+using namespace ekg::epics_impl;
 
 TEST(Epics, ChannelFault) {
     std::unique_ptr<EpicsChannel> pc;
@@ -102,6 +102,8 @@ TEST(Epics, ChannelMonitor) {
 
     EXPECT_NO_THROW(pc_a->putData("value", epics::pvData::AnyScalar(1)););
     EXPECT_NO_THROW(pc_a->putData("value", epics::pvData::AnyScalar(2)););
+
+    std::this_thread::sleep_for(std::chrono::seconds(1));
 
     fetched = pc_a->monitor();
     EXPECT_EQ(fetched->size(), 2);

@@ -1,31 +1,31 @@
 #include <gtest/gtest.h>
 
-#include <gateway/common/ProgramOptions.h>
-#include <gateway/controller/CMDController.h>
-#include <gateway/service/ServiceResolver.h>
-#include <gateway/service/log/ILogger.h>
-#include <gateway/service/log/impl/BoostLogger.h>
+#include <ekg/common/ProgramOptions.h>
+#include <ekg/controller/CMDController.h>
+#include <ekg/service/ServiceResolver.h>
+#include <ekg/service/log/ILogger.h>
+#include <ekg/service/log/impl/BoostLogger.h>
 
-#include <gateway/service/pubsub/pubsub.h>
+#include <ekg/service/pubsub/pubsub.h>
 
-#include <gateway/common/uuid.h>
+#include <ekg/common/uuid.h>
 #include <filesystem>
 
 #include <boost/json.hpp>
 #include <tuple>
 
-using namespace gateway::common;
-using namespace gateway::controller;
-using namespace gateway::service;
-using namespace gateway::service::log;
-using namespace gateway::service::log::impl;
-using namespace gateway::service::pubsub;
-using namespace gateway::service::pubsub::impl::kafka;
+using namespace ekg::common;
+using namespace ekg::controller;
+using namespace ekg::service;
+using namespace ekg::service::log;
+using namespace ekg::service::log::impl;
+using namespace ekg::service::pubsub;
+using namespace ekg::service::pubsub::impl::kafka;
 
 using namespace boost::json;
 
 #define KAFKA_ADDR "kafka:9092"
-#define CMD_QUEUE "gateway_cmd_in"
+#define CMD_QUEUE "ekg_cmd_in"
 
 class CMDMessage : public PublishMessage
 {
@@ -52,12 +52,12 @@ public:
 TEST(CMDController, CheckConfiguration)
 {
     int argc = 1;
-    const char *argv[1] = {"epics-gateway-test"};
+    const char *argv[1] = {"epics-ekg-test"};
     CMDControllerCommandHandler handler = [](CommandConstShrdPtrVec received_command) {};
     // set environment variable for test
-    setenv("EPICS_GATEWAY_log-on-console", "false", 1);
-    setenv("EPICS_GATEWAY_message-bus-address", KAFKA_ADDR, 1);
-    setenv("EPICS_GATEWAY_cmd-input-topic", CMD_QUEUE, 1);
+    setenv("EPICS_ekg_log-on-console", "false", 1);
+    setenv("EPICS_ekg_message-bus-address", KAFKA_ADDR, 1);
+    setenv("EPICS_ekg_cmd-input-topic", CMD_QUEUE, 1);
     std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
     ASSERT_NO_THROW(opt->parse(argc, argv));
     ServiceResolver<ILogger>::registerService(std::make_shared<BoostLogger>(opt->getloggerConfiguration()));
@@ -69,12 +69,12 @@ TEST(CMDController, CheckConfiguration)
 TEST(CMDController, StartStop)
 {
     int argc = 1;
-    const char *argv[1] = {"epics-gateway-test"};
+    const char *argv[1] = {"epics-ekg-test"};
     CMDControllerCommandHandler handler = [](CommandConstShrdPtrVec received_command) {};
     // set environment variable for test
-    setenv("EPICS_GATEWAY_log-on-console", "false", 1);
-    setenv("EPICS_GATEWAY_message-bus-address", KAFKA_ADDR, 1);
-    setenv("EPICS_GATEWAY_cmd-input-topic", CMD_QUEUE, 1);
+    setenv("EPICS_ekg_log-on-console", "false", 1);
+    setenv("EPICS_ekg_message-bus-address", KAFKA_ADDR, 1);
+    setenv("EPICS_ekg_cmd-input-topic", CMD_QUEUE, 1);
     std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
     ASSERT_NO_THROW(opt->parse(argc, argv));
     ServiceResolver<ILogger>::registerService(std::make_shared<BoostLogger>(opt->getloggerConfiguration()));
@@ -86,16 +86,16 @@ TEST(CMDController, StartStop)
 class CMDControllerCommandTestParametrized : public ::testing::TestWithParam<std::tuple<CMDControllerCommandHandler, boost::json::value>>
 {
     int argc = 1;
-    const char *argv[1] = {"epics-gateway-test"};
+    const char *argv[1] = {"epics-ekg-test"};
     std::unique_ptr<CMDController> cmd_controller;
 
 public:
     void SetUp()
     {
         CMDControllerCommandHandler handler = std::get<0>(GetParam());
-        setenv("EPICS_GATEWAY_log-on-console", "false", 1);
-        setenv("EPICS_GATEWAY_message-bus-address", KAFKA_ADDR, 1);
-        setenv("EPICS_GATEWAY_cmd-input-topic", CMD_QUEUE, 1);
+        setenv("EPICS_ekg_log-on-console", "false", 1);
+        setenv("EPICS_ekg_message-bus-address", KAFKA_ADDR, 1);
+        setenv("EPICS_ekg_cmd-input-topic", CMD_QUEUE, 1);
         std::unique_ptr<ProgramOptions> opt = std::make_unique<ProgramOptions>();
         ASSERT_NO_THROW(opt->parse(argc, argv));
         ServiceResolver<ILogger>::registerService(std::make_shared<BoostLogger>(opt->getloggerConfiguration()));
