@@ -38,7 +38,7 @@ namespace ekg
                     inline boost::log::trivial::severity_level getLevel(LogLevel level);
 
                 public:
-                    BoostLogger(std::shared_ptr<const LogConfiguration> configuration);
+                    BoostLogger(ConstLogConfigurationUPtr _configuration);
                     virtual ~BoostLogger();
                     void setLevel(LogLevel level);
                     void logMessage(const std::string &message, LogLevel level = LogLevel::INFO);

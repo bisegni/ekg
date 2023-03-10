@@ -12,11 +12,10 @@ using namespace ekg::service::log::impl;
 #define BASE_LOG_FORMAT "[%TimeStamp%][%Severity%]: %_%"
 #define EXTENDEND_LOG_FORMAT "[%TimeStamp%][%Severity%][%ProcessID%][%ThreadID%]: %_%"
 
-BoostLogger::BoostLogger(std::shared_ptr<const LogConfiguration> configuration) : ILogger(configuration)
+BoostLogger::BoostLogger(ConstLogConfigurationUPtr _configuration) : ILogger(std::move(_configuration))
 {
     logging::add_common_attributes();
     boost::shared_ptr<logging::core> logger = boost::log::core::get();
-    // logger->set_filter(expr::attr<level::LogSeverityLevel>("Severity") >= logLevel);
     if (configuration->log_on_console)
     {
         console_sink = logging::add_console_log(std::clog, logging::keywords::format = EXTENDEND_LOG_FORMAT);

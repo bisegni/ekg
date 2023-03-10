@@ -17,6 +17,7 @@ TEST(EKGateway, Default)
     // remove possible old file
     std::filesystem::remove(LOG_FILE_TEST_NAME);
     // set environment variable for test
+    clearenv();
     setenv(std::string("EPICS_ekg_").append(LOG_ON_CONSOLE).c_str(), "false", 1);
     setenv(std::string("EPICS_ekg_").append(LOG_ON_FILE).c_str(), "true", 1);
     setenv(std::string("EPICS_ekg_").append(LOG_FILE_NAME).c_str(), LOG_FILE_TEST_NAME, 1);

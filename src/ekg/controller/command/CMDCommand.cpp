@@ -1,8 +1,8 @@
-#include <ekg/controller/CMDCommand.h>
+#include <ekg/controller/command/CMDCommand.h>
 #include <ekg/service/ServiceResolver.h>
 #include <ekg/service/log/ILogger.h>
 
-using namespace ekg::controller;
+using namespace ekg::controller::command;
 
 using namespace ekg::service;
 using namespace ekg::service::log;

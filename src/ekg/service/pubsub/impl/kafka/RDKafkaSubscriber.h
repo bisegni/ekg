@@ -15,23 +15,21 @@ namespace ekg::service::pubsub::impl::kafka
 {
     class RDKafkaSubscriber : public ISubscriber, RDKafkaBase
     {
-        const std::string bootstrap_server;
-        const std::string group_id;
         std::unique_ptr<RdKafka::KafkaConsumer> consumer;
-
+        ekg::common::StringVector topics;
     protected:
         int internalConsume(std::unique_ptr<RdKafka::Message> message, SubscriberInterfaceElementVector &dataVector);
 
     public:
-        RDKafkaSubscriber(
-            const std::string &bootstrap_server,
-            const std::string &group_id = std::string());
+        RDKafkaSubscriber(ConstSubscriberConfigurationUPtr configuration);
         RDKafkaSubscriber() = delete;
         virtual ~RDKafkaSubscriber();
         virtual void init();
         virtual void deinit();
-        virtual int setQueue(const ekg::common::StringVector &queue);
-        virtual int getMsg(SubscriberInterfaceElementVector &dataVector, int m_num, int timeo = 10);
+        virtual void setQueue(const ekg::common::StringVector &queue);
+        virtual void addQueue(const ekg::common::StringVector &queue);
+        virtual void commit(const bool& async = false);
+        virtual int getMsg(SubscriberInterfaceElementVector &dataVector, unsigned int m_num, unsigned int timeo = 10);
     };
 
 }

@@ -1,18 +1,18 @@
-#include <gtest/gtest.h>
-#include <ekg/service/epics/EpicsChannel.h>
-#include <ekg/service/epics/EpicsChannelMonitor.h>
-#include <thread>
 #include <chrono>
+#include <ekg/service/epics/EpicsChannel.h>
+#include <ekg/service/epics/EpicsServiceManager.h>
+#include <gtest/gtest.h>
+#include <thread>
 
-using namespace ekg::epics_impl;
+using namespace ekg::service::epics_impl;
 
 TEST(Epics, ChannelFault) {
-    std::unique_ptr<EpicsChannel> pc;
-    EXPECT_ANY_THROW(pc = std::make_unique<EpicsChannel>("ca","bacd_channel_name"));
+    EpicsChannelUPtr pc;
+    EXPECT_ANY_THROW(pc = std::make_unique<EpicsChannel>("ca", "bacd_channel_name"));
 }
 
 TEST(Epics, ChannelOK) {
-    std::unique_ptr<EpicsChannel> pc;
+    EpicsChannelUPtr pc;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc = std::make_unique<EpicsChannel>("pva", "variable:sum"););
     EXPECT_NO_THROW(pc->connect());
@@ -21,7 +21,7 @@ TEST(Epics, ChannelOK) {
 }
 
 TEST(Epics, ChannelOKWithAddress) {
-    std::unique_ptr<EpicsChannel> pc;
+    EpicsChannelUPtr pc;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc = std::make_unique<EpicsChannel>("pva", "variable:sum", "epics"););
     EXPECT_NO_THROW(pc->connect());
@@ -29,17 +29,10 @@ TEST(Epics, ChannelOKWithAddress) {
     EXPECT_NE(val, nullptr);
 }
 
-bool retry_eq(const EpicsChannel& channel, 
-                const std::string & name, 
-                double value, 
-                int mseconds, 
-                int retry_times ) {
-    for (
-        int times = retry_times;
-    times!=0;
-    times--){
+bool retry_eq(const EpicsChannel& channel, const std::string& name, double value, int mseconds, int retry_times) {
+    for (int times = retry_times; times != 0; times--) {
         auto val = channel.getData();
-        if(val->getSubField<epics::pvData::PVDouble>(name)->get()==value){
+        if (val->getSubField<epics::pvData::PVDouble>(name)->get() == value) {
             return true;
         }
         std::this_thread::sleep_for(std::chrono::milliseconds(mseconds));
@@ -48,9 +41,9 @@ bool retry_eq(const EpicsChannel& channel,
 }
 
 TEST(Epics, ChannelGetSetTemplatedGet) {
-    std::unique_ptr<EpicsChannel> pc_sum;
-    std::unique_ptr<EpicsChannel> pc_a;
-    std::unique_ptr<EpicsChannel> pc_b;
+    EpicsChannelUPtr pc_sum;
+    EpicsChannelUPtr pc_a;
+    EpicsChannelUPtr pc_b;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc_sum = std::make_unique<EpicsChannel>("pva", "variable:sum"););
     EXPECT_NO_THROW(pc_a = std::make_unique<EpicsChannel>("pva", "variable:a"););
@@ -67,9 +60,9 @@ TEST(Epics, ChannelGetSetTemplatedGet) {
 }
 
 TEST(Epics, ChannelGetSetPVDatadGet) {
-    std::unique_ptr<EpicsChannel> pc_sum;
-    std::unique_ptr<EpicsChannel> pc_a;
-    std::unique_ptr<EpicsChannel> pc_b;
+    EpicsChannelUPtr pc_sum;
+    EpicsChannelUPtr pc_a;
+    EpicsChannelUPtr pc_b;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc_sum = std::make_unique<EpicsChannel>("pva", "variable:sum"););
     EXPECT_NO_THROW(pc_a = std::make_unique<EpicsChannel>("pva", "variable:a"););
@@ -86,11 +79,11 @@ TEST(Epics, ChannelGetSetPVDatadGet) {
 }
 
 TEST(Epics, ChannelMonitor) {
-    std::unique_ptr<EpicsChannel> pc_a;
+    EpicsChannelUPtr pc_a;
     epics::pvData::PVStructure::const_shared_pointer val;
     EXPECT_NO_THROW(pc_a = std::make_unique<EpicsChannel>("pva", "variable:a"););
     EXPECT_NO_THROW(pc_a->connect());
-        //enable monitor
+    // enable monitor
     EXPECT_NO_THROW(pc_a->putData("value", epics::pvData::AnyScalar(0)););
     EXPECT_EQ(retry_eq(*pc_a, "value", 0, 500, 3), true);
 
@@ -121,13 +114,46 @@ void handler(const MonitorEventVecShrdPtr& event_data) {
     allEvent.insert(allEvent.end(), (*event_data).begin(), (*event_data).end());
 }
 
-TEST(Epics, EpicsChannelMonitor) {
-    std::unique_ptr<EpicsChannelMonitor> monitor = std::make_unique<EpicsChannelMonitor>();
-
-    EXPECT_NO_THROW(monitor->setHandler(std::bind(handler, std::placeholders::_1)););
-    EXPECT_NO_THROW(monitor->addChannel("variable:sum"););
-    EXPECT_NO_THROW(monitor->start(););
-    std::this_thread::sleep_for(std::chrono::microseconds(1000));
-    EXPECT_NO_THROW(monitor->stop(););
+TEST(Epics, EpicsServiceManager) {
+    allEvent.clear();
+    ekg::common::BroadcastToken handler_tok;
+    std::unique_ptr<EpicsServiceManager> monitor = std::make_unique<EpicsServiceManager>();
+    EXPECT_NO_THROW(handler_tok = monitor->addHandler(std::bind(handler, std::placeholders::_1)););
+    EXPECT_NO_THROW(monitor->addChannel("channel:ramp:ramp"););
+    std::this_thread::sleep_for(std::chrono::seconds(2));
     EXPECT_EQ(allEvent.size() > 0, true);
+    monitor.reset();
+}
+
+TEST(Epics, EpicsServiceManagerWrongMOnitoredDevices) {
+    allEvent.clear();
+    std::unique_ptr<EpicsServiceManager> monitor = std::make_unique<EpicsServiceManager>();
+    EXPECT_NO_THROW(monitor->addHandler(std::bind(handler, std::placeholders::_1)););
+    EXPECT_ANY_THROW(monitor->addChannel("wrong::device", "ca"););
+    auto vec = monitor->getMonitoredChannels();
+    std::stringstream ss;
+    for (auto& e: vec) {
+        ss << e;
+    }
+    EXPECT_EQ(monitor->getChannelMonitoredSize(), 0) << "[" + ss.str() + "]";
+    monitor.reset();
+}
+
+TEST(Epics, EpicsServiceManagerAddRemove) {
+    allEvent.clear();
+    std::unique_ptr<EpicsServiceManager> monitor = std::make_unique<EpicsServiceManager>();
+    EXPECT_NO_THROW(monitor->addChannel("wrong::device", "pva"););
+    EXPECT_NO_THROW(monitor->removeChannel("wrong::device"););
+    EXPECT_EQ(monitor->getChannelMonitoredSize(), 0);
+    monitor.reset();
+}
+
+TEST(Epics, EpicsServiceManagerRemoveHandler) {
+    ekg::common::BroadcastToken handler_tok;
+    std::unique_ptr<EpicsServiceManager> monitor = std::make_unique<EpicsServiceManager>();
+    EXPECT_NO_THROW(handler_tok = monitor->addHandler(std::bind(handler, std::placeholders::_1)););
+    EXPECT_EQ(monitor->getHandlerSize(), 1);
+    handler_tok.reset();                     // this should invalidate the handler within the manager
+    EXPECT_EQ(monitor->getHandlerSize(), 0); // this should be 0 because of handler_tok.reset()
+    monitor.reset();
 }

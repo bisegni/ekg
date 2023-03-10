@@ -35,7 +35,7 @@ set(COMMON_SOURCE_FILES
   src/ekg/service/data/repository/ChannelRepository.cpp
 
   src/ekg/service/epics/EpicsChannel.cpp
-  src/ekg/service/epics/EpicsChannelMonitor.cpp
+  src/ekg/service/epics/EpicsServiceManager.cpp
 
   src/ekg/service/pubsub/IPublisher.cpp
   src/ekg/service/pubsub/ISubscriber.cpp
@@ -46,8 +46,13 @@ set(COMMON_SOURCE_FILES
 
   src/ekg/service/log/impl/BoostLogger.cpp
 
-  src/ekg/controller/CMDController.cpp
-  src/ekg/controller/CMDCommand.cpp
+  src/ekg/controller/command/CMDController.cpp
+  src/ekg/controller/command/CMDCommand.cpp
+
+  src/ekg/controller/node/NodeController.cpp
+  src/ekg/controller/node/configuration/NodeConfiguration.cpp
+  src/ekg/controller/node/worker/AcquireCommandWorker.cpp
+  src/ekg/controller/node/worker/GetCommandWorker.cpp
   )
 
 set(SOURCE_FILES
@@ -83,6 +88,7 @@ set(TEST_SOURCE_FILES
     test/pubsub/kafka.cpp
     test/common/ProgramOptions.cpp
     test/controller/CMDController.cpp
+    test/controller/NodeController.cpp
     ${COMMON_SOURCE_FILES}
     )
 
