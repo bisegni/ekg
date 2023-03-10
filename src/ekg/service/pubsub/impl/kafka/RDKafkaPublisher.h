@@ -17,13 +17,12 @@ namespace ekg::service::pubsub::impl::kafka
         bool _auto_poll;
         std::thread auto_poll_thread;
         std::unique_ptr<RdKafka::Producer> producer;
-        const std::string bootstrap_server;
     protected:
         void dr_cb(RdKafka::Message &message);
         void autoPoll();
 
     public:
-        explicit RDKafkaPublisher(const std::string &bootstrap_server);
+        explicit RDKafkaPublisher(ConstPublisherConfigurationUPtr configuration);
         virtual ~RDKafkaPublisher();
         virtual int createQueue(const std::string &queue);
         virtual void setAutoPoll(bool autopoll);

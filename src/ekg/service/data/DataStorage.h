@@ -1,4 +1,7 @@
 
+#ifndef EKG_SERVICE_DATA_DATASTORAGE_H_
+#define EKG_SERVICE_DATA_DATASTORAGE_H_
+
 #include <sqlite_orm/sqlite_orm.h>
 #include <ekg/service/data/repository/ChannelRepository.h>
 
@@ -13,10 +16,11 @@ namespace ekg::service::data
     {
         using namespace sqlite_orm;
         return make_storage(path,
-                            make_table("channel",
-                                       make_column("id", &repository::ChannelType::id, primary_key().autoincrement()),
-                                       make_column("channel_name", &repository::ChannelType::channel_name),
-                                       make_column("channel_protocol", &repository::ChannelType::channel_protocol)));
+                            make_table("channel_monitor",
+                                       make_column("id", &repository::ChannelMonitorType::id, primary_key().autoincrement()),
+                                       make_column("channel_name", &repository::ChannelMonitorType::channel_name),
+                                       make_column("channel_protocol", &repository::ChannelMonitorType::channel_protocol),
+                                       make_column("channel_destination", &repository::ChannelMonitorType::channel_destination)));
     }
 
     using Storage = decltype(initStorage(""));
@@ -55,6 +59,8 @@ namespace ekg::service::data
         std::unique_lock<std::recursive_mutex> s_lock;
     };
 
+    typedef std::unique_ptr<DataStorage> DataStorageUPtr;
+
     /**
      *
      */
@@ -76,3 +82,5 @@ namespace ekg::service::data
     };
 
 }
+
+#endif // EKG_SERVICE_DATA_DATASTORAGE_H_

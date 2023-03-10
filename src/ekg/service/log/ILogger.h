@@ -3,12 +3,15 @@
 
 #include <string>
 #include <memory>
+#include <ekg/common/types.h>
+
 namespace ekg
 {
     namespace service
     {
         namespace log
         {
+            // logger configuration type
             typedef struct LogConfiguration
             {
                 bool log_on_console;
@@ -18,7 +21,8 @@ namespace ekg
                 bool log_on_syslog;
                 std::string log_syslog_srv;
                 int log_syslog_srv_port;
-            }LogConfiguration;
+            } LogConfiguration;
+            DEFINE_PTR_TYPES(LogConfiguration)
 
             typedef enum class LogLevel
             {
@@ -28,17 +32,19 @@ namespace ekg
                 FATAL
             } LogLevel;
 
+            // logger abstraction class
             class ILogger
             {
             protected:
-                std::shared_ptr<const LogConfiguration> configuration;
-
+                ConstLogConfigurationUPtr configuration;
             public:
-                ILogger(std::shared_ptr<const LogConfiguration> configuration):configuration(configuration){};
+                ILogger(ConstLogConfigurationUPtr configuration):configuration(std::move(configuration)){};
                 virtual ~ILogger() = default;
                 virtual void setLevel(LogLevel level) = 0;
                 virtual void logMessage(const std::string &message, LogLevel level = LogLevel::INFO) = 0;
             };
+
+            DEFINE_PTR_TYPES(ILogger)
         }
     }
 }

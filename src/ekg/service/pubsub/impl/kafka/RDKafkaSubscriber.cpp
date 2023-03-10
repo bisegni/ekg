@@ -7,10 +7,8 @@
 using namespace ekg::common;
 using namespace ekg::service::pubsub::impl::kafka;
 
-RDKafkaSubscriber::RDKafkaSubscriber(
-    const std::string &bootstrap_server,
-    const std::string &group_id)
-    : ISubscriber(), RDKafkaBase(), bootstrap_server(bootstrap_server), group_id(group_id) {}
+RDKafkaSubscriber::RDKafkaSubscriber(ConstSubscriberConfigurationUPtr configuration)
+    : ISubscriber(std::move(configuration)), RDKafkaBase() {}
 
 RDKafkaSubscriber::~RDKafkaSubscriber() {}
 
@@ -20,10 +18,10 @@ void RDKafkaSubscriber::init()
     // setting properties
     RDK_CONF_SET(conf, "enable.partition.eof", "false")
     // RDK_CONF_SET(conf, "debug", "cgrp,topic,fetch,protocol")
-    RDK_CONF_SET(conf, "bootstrap.servers", bootstrap_server)
-    RDK_CONF_SET(conf, "group.id", group_id.empty()?UUID::generateUUIDLite():group_id)
-    RDK_CONF_SET(conf, "client.id", "epics_ekg_consumer_" + UUID::generateUUIDLite())
-    RDK_CONF_SET(conf, "enable.auto.commit", "true")
+    RDK_CONF_SET(conf, "bootstrap.servers", configuration->server_address)
+    RDK_CONF_SET(conf, "group.id", configuration->group_id.empty()?UUID::generateUUIDLite():configuration->group_id)
+    RDK_CONF_SET(conf, "client.id", "ekg_consumer_" + UUID::generateUUIDLite())
+    RDK_CONF_SET(conf, "enable.auto.commit", "false")
     RDK_CONF_SET(conf, "auto.offset.reset", "latest")
     RDK_CONF_SET(conf, "default_topic_conf", t_conf.get())
 
@@ -31,7 +29,6 @@ void RDKafkaSubscriber::init()
     consumer.reset(RdKafka::KafkaConsumer::create(conf.get(), errstr));
     if (!consumer)
     {
-        // RDK_CONS_ERR_ << "Failed to create consumer: " << errstr;
         throw std::runtime_error("Error creating kafka producer (" + errstr + ")");
     }
 }
@@ -40,35 +37,55 @@ void RDKafkaSubscriber::deinit()
     consumer->close();
 }
 
-int RDKafkaSubscriber::setQueue(const ekg::common::StringVector &queue)
+void RDKafkaSubscriber::setQueue(const ekg::common::StringVector &queue)
 {
     if (!consumer)
     {
         throw std::runtime_error("Subscriber has not been initialized");
     }
-    RdKafka::ErrorCode err = consumer->subscribe(queue);
+    //replace actual topics
+    topics = queue;
+    RdKafka::ErrorCode err = consumer->subscribe(topics);
     if (err != RdKafka::ERR_NO_ERROR)
     {
-        // RDK_CONS_ERR_ << "Failed to subscribe " << RdKafka::err2str(err);
-        return -1;
-    }
-    else
-    {
-        return 0;
+        throw std::runtime_error("Error creating kafka producer (" + RdKafka::err2str(err) + ")");
     }
 }
 
-int RDKafkaSubscriber::getMsg(SubscriberInterfaceElementVector &messages, int m_num, int timeo)
+void RDKafkaSubscriber::addQueue(const ekg::common::StringVector &queue)
+{
+    if (!consumer)
+    {
+        throw std::runtime_error("Subscriber has not been initialized");
+    }
+    //replace actual topics
+    topics.insert(std::end(topics), std::begin(queue), std::end(queue));
+    RdKafka::ErrorCode err = consumer->subscribe(topics);
+    if (err != RdKafka::ERR_NO_ERROR)
+    {
+        throw std::runtime_error("Error creating kafka producer (" + RdKafka::err2str(err) + ")");
+    }
+}
+
+void RDKafkaSubscriber::commit(const bool& async) {
+    RdKafka::ErrorCode err = async?consumer->commitSync():consumer->commitAsync();
+    if (err != RdKafka::ERR_NO_ERROR)
+    {
+        throw std::runtime_error("Error committing offset (" + RdKafka::err2str(err) + ")");
+    }
+}
+
+int RDKafkaSubscriber::getMsg(SubscriberInterfaceElementVector &messages, unsigned int m_num, unsigned int timeo)
 {
     RdKafka::ErrorCode err = RdKafka::ERR_NO_ERROR;
     // RDK_CONS_APP_ << "Entering getMsg";
     bool looping = true;
 
-    int timeout_ms = timeo;
-    auto end = std::chrono::system_clock::now() + std::chrono::milliseconds(timeo);
+    auto timeout_ms = std::chrono::microseconds(timeo);
+    auto end = std::chrono::system_clock::now() + std::chrono::microseconds(timeo);
     while (messages.size() < m_num && looping)
     {
-        std::unique_ptr<RdKafka::Message> msg(consumer->consume(timeout_ms));
+        std::unique_ptr<RdKafka::Message> msg(consumer->consume((int)timeout_ms.count()));
         switch (msg->err())
         {
         case RdKafka::ERR__PARTITION_EOF:
@@ -77,15 +94,13 @@ int RDKafkaSubscriber::getMsg(SubscriberInterfaceElementVector &messages, int m_
             // This allows getting ready messages, while not waiting for new ones
             if (messages.size() > 0)
             {
-                timeout_ms = 1;
+                timeout_ms = std::chrono::microseconds(1);
             }
             msg.reset();
-            // RDK_CONS_APP_ << "Retry on EOF partition";
             break;
         }
         case RdKafka::ERR_NO_ERROR:
         {
-            // RDK_CONS_APP_ << "Message recevied";
             if (internalConsume(std::move(msg), messages) != 0)
             {
                 // RDK_CONS_ERR_ << "Error consuming received message";
@@ -109,10 +124,10 @@ int RDKafkaSubscriber::getMsg(SubscriberInterfaceElementVector &messages, int m_
             looping = false;
             break;
         }
-        auto _now = std::chrono::system_clock::now();
-        timeout_ms = std::chrono::duration_cast<std::chrono::microseconds>(end - _now).count();
-
-        if (timeout_ms < 0)
+        //auto _now = ;
+        //timeout_ms = std::chrono::duration_cast<std::chrono::microseconds>(end - _now).count();
+        auto difference = (end - std::chrono::system_clock::now());
+        if (difference.count() < 0)
         {
             break;
         }
