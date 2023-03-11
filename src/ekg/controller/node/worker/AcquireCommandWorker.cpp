@@ -59,9 +59,6 @@ void AcquireCommandWorker::acquireManagement(ekg::controller::command::CommandCo
             // add topic to channel
             // check if the topic is already present[fault tollerant check]
             if (std::find(std::begin(vec_ref), std::end(vec_ref), a_ptr->destination_topic) == std::end(vec_ref)) {
-                logger->logMessage("Activate monitor on: " + a_ptr->channel_name
-                                       + " for topic: " + a_ptr->destination_topic,
-                                   LogLevel::INFO);
                 std::unique_lock lock(channel_map_mtx);
                 channel_topics_map[a_ptr->channel_name].push_back(a_ptr->destination_topic);
             }
@@ -69,14 +66,12 @@ void AcquireCommandWorker::acquireManagement(ekg::controller::command::CommandCo
             // remove topic to channel
             auto itr = std::find(std::begin(vec_ref), std::end(vec_ref), a_ptr->destination_topic);
             if (itr != std::end(vec_ref)) {
-                logger->logMessage("Deactivate monitor on: " + a_ptr->channel_name
-                                       + " for topic: " + a_ptr->destination_topic,
-                                   LogLevel::INFO);
                 std::unique_lock lock(channel_map_mtx);
                 vec_ref.erase(itr);
             }
         }
         activate = vec_ref.size();
+        logger->logMessage(std::string((a_ptr->activate?"Activate":"Deactivate")) + std::string(" monitor on: ") + a_ptr->channel_name+std::string(" for topic: ")+a_ptr->destination_topic, LogLevel::INFO);
     }
     // if the vec_ref has size > 0 mean that someone is still needed the channel data in monitor way
     epics_service_manager->monitorChannel(a_ptr->channel_name, activate);
