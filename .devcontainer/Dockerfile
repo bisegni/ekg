@@ -1,8 +1,13 @@
-FROM mcr.microsoft.com/devcontainers/cpp:0-ubuntu-22.04
+ARG GCC_VERSION=12.2.0-bullseye
+FROM gcc:$GCC_VERSION
+LABEL maintainer="bisegni@slac.stanford.edu"
 
-ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.22.2"
+ARG REINSTALL_CMAKE_VERSION_FROM_SOURCE="3.23.5"
 
-# Optionally install the cmake for vcpkg
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+     && apt-get -y update \
+     && apt-get -y install --no-install-recommends software-properties-common ninja-build tclsh
+
 COPY ./reinstall-cmake.sh /tmp/
 
 RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
@@ -10,18 +15,8 @@ RUN if [ "${REINSTALL_CMAKE_VERSION_FROM_SOURCE}" != "none" ]; then \
     fi \
     && rm -f /tmp/reinstall-cmake.sh
 
-# [Optional] Uncomment this section to install additional vcpkg ports.
-# RUN su vscode -c "${VCPKG_ROOT}/vcpkg install <your-port-name-here>"
-
-# [Optional] Uncomment this section to install additional packages.
-# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-#     && apt-get -y install --no-install-recommends <your-package-list-here>
-
-
-# [Optional] Uncomment this section to install additional packages.
-RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
-     && apt-get -y install --no-install-recommends software-properties-common ninja-build
-
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/local/bin/gcc 100
+RUN update-alternatives --install /usr/bin/g++ g++ /usr/local/bin/g++ 100
 # Install llvm
 # COPY tools/llvm.sh /tmp/
 # RUN chmod +x /tmp/llvm.sh && /tmp/llvm.sh
@@ -31,6 +26,6 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
 # RUN update-alternatives --install /usr/bin/clang++ c++ /usr/bin/clang++-14 100
 # RUN update-alternatives --install /usr/bin/lldb lldb /usr/bin/lldb-14 100
 
-#RUN useradd -rm -d /home/vscode -s /bin/bash -g root -G sudo -u 1001 vscode
-USER vscode
-WORKDIR /home/vscode
+# RUN useradd -rm -d /home/vscode -s /bin/bash -g root -G sudo -u 1001 vscode
+# USER vscode
+# WORKDIR /home/vscode

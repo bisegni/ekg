@@ -1,0 +1,6 @@
+*
+!src
+!test
+!.devcontainer
+!docker
+!CMakeLists.txt
