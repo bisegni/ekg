@@ -3,14 +3,11 @@
 
 #include <ekg/common/types.h>
 #include <ekg/controller/command/CMDCommand.h>
+#include <ekg/service/log/ILogger.h>
 #include <ekg/service/pubsub/ISubscriber.h>
 #include <memory>
 #include <string>
 #include <thread>
-namespace ekg::service::log {
-// forward decalration
-class ILogger;
-} // namespace ekg::service::log
 
 namespace ekg::controller::command {
 // configuration
@@ -38,7 +35,7 @@ typedef std::function<void(CommandConstShrdPtrVec)> CMDControllerCommandHandler;
 class CMDController {
     CMDControllerCommandHandler cmd_handler;
     std::shared_ptr<ekg::service::log::ILogger> logger;
-    std::unique_ptr<ekg::service::pubsub::ISubscriber> subscriber;
+    std::shared_ptr<ekg::service::pubsub::ISubscriber> subscriber;
     std::thread t_subscriber;
     bool run;
     void consume();
@@ -48,13 +45,14 @@ class CMDController {
 public:
     const ConstCMDControllerConfigUPtr configuration;
     CMDController(ConstCMDControllerConfigUPtr configuration,
-                  ekg::service::pubsub::ConstSubscriberConfigurationUPtr subscriber_configuration,
                   CMDControllerCommandHandler cmd_handler);
     CMDController() = delete;
     CMDController(const CMDController&) = delete;
     CMDController& operator=(const CMDController&) = delete;
     ~CMDController();
 };
+
+DEFINE_PTR_TYPES(CMDController)
 } // namespace ekg::controller::command
 
 #endif // ekg_SERVICE_CONTROLLER_CMDCONTROLLER_H_

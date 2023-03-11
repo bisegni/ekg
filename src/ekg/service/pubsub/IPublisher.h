@@ -49,14 +49,13 @@ class IPublisher {
 protected:
     MapEvtHndlrForReqType eventCallbackForReqType;
     const ConstPublisherConfigurationUPtr configuration;
+
 public:
     IPublisher(ConstPublisherConfigurationUPtr configuration);
     IPublisher() = delete;
     IPublisher(const IPublisher&) = delete;
     IPublisher& operator=(const IPublisher&) = delete;
     virtual ~IPublisher() = default;
-    virtual void init() = 0;
-    virtual void deinit() = 0;
     virtual void setAutoPoll(bool autopoll) = 0;
     //! PublisherInterface initialization
     virtual int setCallBackForReqType(const std::string req_type, EventCallback eventCallback);

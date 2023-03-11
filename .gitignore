@@ -1,2 +1,5 @@
 build
 test.sqlite
+test/log-file-test.log
+log-file-test.log
+ekg.sqlite

@@ -1,6 +1,9 @@
 #ifndef EKG_CONTROLLER_NODE_NODECONTROLLER_H_
 #define EKG_CONTROLLER_NODE_NODECONTROLLER_H_
 
+
+#include <ekg/common/types.h>
+
 #include <ekg/common/BS_thread_pool.hpp>
 #include <ekg/controller/command/CMDCommand.h>
 #include <ekg/controller/node/configuration/NodeConfiguration.h>
@@ -35,7 +38,7 @@ public:
      */
     void submitCommand(ekg::controller::command::CommandConstShrdPtrVec commands);
 };
-
+DEFINE_PTR_TYPES(NodeController)
 } // namespace ekg::controller::node
 
 #endif // EKG_CONTROLLER_NODE_NODECONTROLLER_H_

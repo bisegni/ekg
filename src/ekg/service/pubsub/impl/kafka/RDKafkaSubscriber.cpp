@@ -8,9 +8,9 @@ using namespace ekg::common;
 using namespace ekg::service::pubsub::impl::kafka;
 
 RDKafkaSubscriber::RDKafkaSubscriber(ConstSubscriberConfigurationUPtr configuration)
-    : ISubscriber(std::move(configuration)), RDKafkaBase() {}
+    : ISubscriber(std::move(configuration)), RDKafkaBase() {init();}
 
-RDKafkaSubscriber::~RDKafkaSubscriber() {}
+RDKafkaSubscriber::~RDKafkaSubscriber() {deinit();}
 
 void RDKafkaSubscriber::init()
 {
@@ -86,6 +86,7 @@ int RDKafkaSubscriber::getMsg(SubscriberInterfaceElementVector &messages, unsign
     while (messages.size() < m_num && looping)
     {
         std::unique_ptr<RdKafka::Message> msg(consumer->consume((int)timeout_ms.count()));
+        if(!msg) continue;
         switch (msg->err())
         {
         case RdKafka::ERR__PARTITION_EOF:
@@ -148,14 +149,13 @@ int RDKafkaSubscriber::internalConsume(std::unique_ptr<RdKafka::Message> message
 {
     size_t len = message->len();
     std::unique_ptr<char[]> buffer(new char[len]);
-
     // copy message
     std::memcpy(buffer.get(), message->payload(), len);
 
     messages.push_back(
         std::make_shared<const SubscriberInterfaceElement>(
             SubscriberInterfaceElement{
-                *message->key(),
+                message->key()==nullptr?"default-key":*message->key(),
                 len,
                 std::move(buffer)}));
     return 0;

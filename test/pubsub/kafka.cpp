@@ -44,8 +44,6 @@ TEST(Kafka, KafkaSimplePubSub) {
 
     std::string message_sent = "hello_" + UUID::generateUUIDLite();
 
-    ASSERT_NO_THROW(producer->init());
-    ASSERT_NO_THROW(consumer->init());
     ASSERT_NO_THROW(consumer->setQueue({TOPIC_TEST_NAME}));
     ASSERT_EQ(consumer->getMsg(messages, 1, 1000), 0);
     ASSERT_NO_THROW(consumer->commit(););
@@ -83,8 +81,6 @@ TEST(Kafka, KafkaPushMultipleMessage) {
         std::make_unique<const SubscriberConfiguration>(SubscriberConfiguration{.server_address = "kafka:9092"})
     );
 
-    ASSERT_NO_THROW(producer->init());
-    ASSERT_NO_THROW(consumer->init());
     ASSERT_NO_THROW(consumer->setQueue({TOPIC_TEST_NAME}));
     PublisherMessageVector push_messages;
     std::vector<std::string> message_to_sent;

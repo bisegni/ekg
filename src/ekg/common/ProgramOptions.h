@@ -2,6 +2,8 @@
 #define __PROGRAMOPTIONS_H__
 
 #include <boost/program_options.hpp>
+
+#include <ekg/common/types.h>
 #include <ekg/service/log/ILogger.h>
 #include <ekg/controller/command/CMDController.h>
 #include <ekg/service/pubsub/IPublisher.h>
@@ -9,8 +11,11 @@
 
 namespace po = boost::program_options;
 
+static const char* const HELP = "help";
+
 static const char* const CONF_FILE = "conf-file";
 static const char* const CONF_FILE_NAME = "conf-file-name";
+static const char* const LOG_LEVEL = "log-level";
 static const char* const LOG_ON_CONSOLE = "log-on-console";
 static const char* const LOG_ON_FILE = "log-on-file";
 static const char* const LOG_FILE_NAME = "log-file-name";
@@ -30,7 +35,7 @@ static const char* const SUB_SERVER_ADDRESS = "sub-server-address";
 static const char* const SUB_GROUP_ID = "sub-group-id";
 static const char* const SUB_IMPL_KV = "sub-impl-kv";
 
-static const char* const LOG_LEVEL = "log-level";
+static const char* const STORAGE_PATH = "storage-path";
 
 namespace ekg
 {
@@ -54,6 +59,7 @@ namespace ekg
             ekg::controller::command::ConstCMDControllerConfigUPtr getCMDControllerConfiguration();
             ekg::service::pubsub::ConstPublisherConfigurationUPtr getPublisherConfiguration();
             ekg::service::pubsub::ConstSubscriberConfigurationUPtr getSubscriberConfiguration();
+            const std::string getStoragePath();
             bool optionConfigure(const std::string &name);
 
             template <class T>
@@ -61,8 +67,11 @@ namespace ekg
             {
                 return vm[name].as<T>();
             }
-        };
 
+            bool hasOption(const std::string& option);
+            const std::string getHelpDescription();
+        };
+        DEFINE_PTR_TYPES(ProgramOptions)
     } // namespace common
 
 } // namespace ekg

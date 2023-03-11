@@ -42,8 +42,6 @@ class DummyPublisher : public IPublisher {
 public:
     DummyPublisher(std::latch& lref):IPublisher(std::make_unique<const PublisherConfiguration>(PublisherConfiguration{})), lref(lref){};
     ~DummyPublisher() = default;
-    void init() {}
-    void deinit() {}
     void setAutoPoll(bool autopoll) {}
     int setCallBackForReqType(const std::string req_type, EventCallback eventCallback) { return 0; }
     int createQueue(const std::string& queue) { return 0; }
