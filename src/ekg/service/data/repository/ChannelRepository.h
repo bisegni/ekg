@@ -24,6 +24,16 @@ inline ChannelMonitorType toChannelMonitor(const ekg::controller::command::Aquir
     };
 }
 
+inline  ekg::controller::command::CommandConstShrdPtr  fromChannelMonitor(const ChannelMonitorType& command) {
+    return std::make_shared<ekg::controller::command::AquireCommand>(ekg::controller::command::AquireCommand {
+        ekg::controller::command::CommandType::monitor,
+        command.channel_protocol,
+        command.channel_name, 
+        true,
+        command.channel_destination
+    });
+}
+
 typedef std::unique_ptr<ChannelMonitorType> ChannelMonitorTypeUPtr;
 typedef std::function<void(uint32_t index, const ChannelMonitorType&)> ChannelMonitorTypeProcessHandler;
 typedef std::vector<std::tuple<std::string, std::string>> ChannelMonitorDistinctResultType;

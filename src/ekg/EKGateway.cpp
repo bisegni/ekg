@@ -53,7 +53,8 @@ int EKGateway::setup(int argc, const char* argv[]) {
         // ServiceResolver<DataStorage>::registerService(std::make_shared<DataStorage>(po->getStoragePath()));
         logger->logMessage("Start node controller");
         node_controller = std::make_unique<NodeController>(std::make_unique<DataStorage>(po->getStoragePath()));
-
+        logger->logMessage("Restore persistent command");
+        node_controller->reloadPersistentCommand();
         logger->logMessage("Start command controller");
         cmd_controller =
             std::make_unique<CMDController>(po->getCMDControllerConfiguration(),

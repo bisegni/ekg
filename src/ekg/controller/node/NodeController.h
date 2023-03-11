@@ -33,9 +33,11 @@ public:
     NodeController(const NodeController&) = delete;
     NodeController& operator=(const NodeController&) = delete;
     ~NodeController();
-    /**
-     * Process an array of command
-     */
+
+    // apply all the spermanent command
+    void reloadPersistentCommand();
+    
+    // Process an array of command
     void submitCommand(ekg::controller::command::CommandConstShrdPtrVec commands);
 };
 DEFINE_PTR_TYPES(NodeController)

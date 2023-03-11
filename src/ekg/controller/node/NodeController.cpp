@@ -12,7 +12,6 @@ using namespace ekg::controller::node::configuration;
 
 using namespace ekg::controller::command;
 
-
 using namespace ekg::service;
 using namespace ekg::service::data;
 using namespace ekg::service::data::repository;
@@ -36,7 +35,16 @@ NodeController::NodeController(DataStorageUPtr data_storage)
 
 NodeController::~NodeController() { processing_pool->wait_for_tasks(); }
 
-void NodeController::submitCommand(ekg::controller::command::CommandConstShrdPtrVec commands) {
+void NodeController::reloadPersistentCommand() {
+    node_configuration->iterateAllChannelMonitor(
+        [this](uint32_t index, const ChannelMonitorType& monitor_element) {
+           auto command =  fromChannelMonitor(monitor_element);
+           submitCommand({command});
+        }   
+    );
+}
+
+void NodeController::submitCommand(CommandConstShrdPtrVec commands) {
     // scann and process al command
     for (auto& c: commands) {
         switch (c->type) {
