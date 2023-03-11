@@ -1,5 +1,7 @@
 #include <ekg/service/log/impl/BoostLogger.h>
 
+#include <algorithm>
+
 namespace sources = boost::log::sources;
 namespace logging = boost::log;
 namespace keywords = boost::log::keywords;
@@ -11,6 +13,21 @@ using namespace ekg::service::log::impl;
 
 #define BASE_LOG_FORMAT "[%TimeStamp%][%Severity%]: %_%"
 #define EXTENDEND_LOG_FORMAT "[%TimeStamp%][%Severity%][%ProcessID%][%ThreadID%]: %_%"
+
+static LogLevel string_to_log_level(const std::string & token) {
+    LogLevel level = LogLevel::INFO;
+    std::string non_const_str = token;
+    std::transform(non_const_str.begin(), non_const_str.end(), non_const_str.begin(), [](unsigned char c) { return std::tolower(c); });
+    if (non_const_str == "error")
+        level = LogLevel::ERROR;
+    else if (non_const_str == "info")
+        level = LogLevel::INFO;
+    else if (non_const_str == "debug")
+        level = LogLevel::DEBUG;
+    else if (non_const_str == "fatal")
+        level = LogLevel::FATAL;
+    return level;
+}
 
 BoostLogger::BoostLogger(ConstLogConfigurationUPtr _configuration) : ILogger(std::move(_configuration))
 {
@@ -40,8 +57,8 @@ BoostLogger::BoostLogger(ConstLogConfigurationUPtr _configuration) : ILogger(std
         // Adding the sink to the core.b
         logger->add_sink(syslog_sink);
     }
-
-    // enable the log in case of needs
+    setLevel(string_to_log_level(configuration->log_level));
+    // enable the log output in case of needs
     logger->set_logging_enabled(
         configuration->log_on_console ||
         configuration->log_on_file ||

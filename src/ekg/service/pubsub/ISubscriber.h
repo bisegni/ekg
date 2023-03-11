@@ -46,8 +46,6 @@ protected:
 public:
     ISubscriber(ConstSubscriberConfigurationUPtr configuration);
     virtual ~ISubscriber() = default;
-    virtual void init() = 0;
-    virtual void deinit() = 0;
     /**
      * @brief Set the Topics where the consumer need to fetch data
      *

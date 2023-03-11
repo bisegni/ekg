@@ -13,7 +13,6 @@ typedef std::unique_ptr< const x> Const##x##UPtr; \
 typedef std::shared_ptr<x> x##ShrdPtr; \
 typedef std::shared_ptr<const x> Const##x##ShrdPtr;
 
-
 #define DEFINE_VECTOR_FOR_TYPE(t, n)              \
     typedef std::vector<t> n;                     \
     typedef std::vector<t>::iterator n##Iterator; \

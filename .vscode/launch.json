@@ -5,6 +5,34 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Test Application",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/ekg",
+            "args": ["--log-on-console","--cmd-input-topic=cmd_topic_in","--sub-server-address=kafka:9092","--pub-server-address=kafka:9092"],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "LD_LIBRARY_PATH",
+                    "value": "$LD_LIBRARY_PATH:${workspaceFolder}/build/local/lib"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb",
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                },
+                {
+                    "description": "Set Disassembly Flavor to Intel",
+                    "text": "-gdb-set disassembly-flavor intel",
+                    "ignoreFailures": true
+                }
+            ]
+        },{
             "name": "Test Program Option",
             "type": "cppdbg",
             "request": "launch",
@@ -33,11 +61,11 @@
                 }
             ]
         },{
-            "name": "Test ekg",
+            "name": "Test EKGateway",
             "type": "cppdbg",
             "request": "launch",
             "program": "${workspaceFolder}/build/ekg-test",
-            "args": ["--gtest_filter=ekg*"],
+            "args": ["--gtest_filter=EKGateway*"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [

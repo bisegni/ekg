@@ -20,14 +20,13 @@ namespace ekg::service::pubsub::impl::kafka
     protected:
         void dr_cb(RdKafka::Message &message);
         void autoPoll();
-
+        virtual void init();
+        virtual void deinit();
     public:
         explicit RDKafkaPublisher(ConstPublisherConfigurationUPtr configuration);
         virtual ~RDKafkaPublisher();
         virtual int createQueue(const std::string &queue);
         virtual void setAutoPoll(bool autopoll);
-        virtual void init();
-        virtual void deinit();
         virtual int flush(const int timeo = 10000);
         virtual int pushMessage(PublishMessageUniquePtr message);
         virtual int pushMessages(PublisherMessageVector &messages);

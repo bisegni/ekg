@@ -6,9 +6,9 @@ RDKafkaPublisher::RDKafkaPublisher(ConstPublisherConfigurationUPtr configuration
     : IPublisher(std::move(configuration))
     , RDKafkaBase()
     , _stop_inner_thread(false)
-    , _auto_poll(false){}
+    , _auto_poll(false){init();}
 
-RDKafkaPublisher::~RDKafkaPublisher() {}
+RDKafkaPublisher::~RDKafkaPublisher() {deinit();}
 
 void RDKafkaPublisher::setAutoPoll(bool autopoll) { _auto_poll = autopoll; }
 
@@ -100,7 +100,6 @@ int RDKafkaPublisher::pushMessage(PublishMessageUniquePtr message) {
     RdKafka::Headers* headers = RdKafka::Headers::create();
     const std::string distribution_key = message->getDistributionKey();
     // headers->add("packet_num", std::to_string(idx));
-    headers->add("custom_chaos_header", "test");
     resp = producer->produce(message->getQueue(),
                              RdKafka::Topic::PARTITION_UA,
                              0 /* zero copy management */,

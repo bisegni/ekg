@@ -1,9 +1,13 @@
 #include <ekg/service/data/DataStorage.h>
 
+#include <filesystem>
+
 using namespace ekg::service::data;
 using namespace ekg::service::data::repository;
 
 using namespace sqlite_orm;
+
+namespace fs = std::filesystem;
 
 #define PUBLIC_SHARED_ENABLER(x)                                                      \
     struct x##SharedEnabler : public x                                                \
@@ -15,7 +19,18 @@ using namespace sqlite_orm;
 
 DataStorage::DataStorage(const std::string &path)
 {
-    storage = std::make_shared<Storage>(initStorage(path));
+    const fs::path db_path = path;
+    std::string file_path;
+
+    if(db_path.filename().has_filename()) {
+        file_path = path;
+    } else if(fs::exists(db_path) && fs::is_directory(db_path)) {
+        file_path = db_path / "database.sqlite";
+    } else {
+        throw std::runtime_error("The path "+ path + " not exists");
+    }
+
+    storage = std::make_shared<Storage>(initStorage(file_path));
     if (!storage)
     {
         throw std::runtime_error("Error creating database");

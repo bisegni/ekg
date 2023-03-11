@@ -69,6 +69,9 @@ void AcquireCommandWorker::acquireManagement(ekg::controller::command::CommandCo
             // remove topic to channel
             auto itr = std::find(std::begin(vec_ref), std::end(vec_ref), a_ptr->destination_topic);
             if (itr != std::end(vec_ref)) {
+                logger->logMessage("Deactivate monitor on: " + a_ptr->channel_name
+                                       + " for topic: " + a_ptr->destination_topic,
+                                   LogLevel::INFO);
                 std::unique_lock lock(channel_map_mtx);
                 vec_ref.erase(itr);
             }

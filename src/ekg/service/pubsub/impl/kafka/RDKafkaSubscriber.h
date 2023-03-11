@@ -19,13 +19,12 @@ namespace ekg::service::pubsub::impl::kafka
         ekg::common::StringVector topics;
     protected:
         int internalConsume(std::unique_ptr<RdKafka::Message> message, SubscriberInterfaceElementVector &dataVector);
-
+        virtual void init();
+        virtual void deinit();
     public:
         RDKafkaSubscriber(ConstSubscriberConfigurationUPtr configuration);
         RDKafkaSubscriber() = delete;
         virtual ~RDKafkaSubscriber();
-        virtual void init();
-        virtual void deinit();
         virtual void setQueue(const ekg::common::StringVector &queue);
         virtual void addQueue(const ekg::common::StringVector &queue);
         virtual void commit(const bool& async = false);
